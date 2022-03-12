@@ -1,0 +1,633 @@
+version: '3.8'
+services:
+  traefik:
+    image: docker.io/library/traefik:v2.5
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.traefik-dash.entrypoints: 'https'
+      traefik.http.routers.traefik-dash.rule: 'Host(`traefik.powell.place`)'
+      traefik.http.routers.traefik-dash.service: 'api@internal'
+      traefik.http.routers.traefik-dash.tls: 'true'
+      traefik.http.routers.traefik-dash.middlewares: 'hsts@file,crowdsec@file,authentik-traefik-admin-oauth@docker'
+    command:
+      - '--api.dashboard=true' # enables the web UI
+      - '--api.insecure=true' # enables the web UI
+      - '--ping=true' # enables healthcheck route
+      - '--providers.docker' # tell Traefik to listen to docker
+      - '--providers.docker.exposedbydefault=false' # do not expose containers unless explicitly told so
+      - '--providers.docker.network=base_nginx-net' # set traefik's network
+      # - '--log.level=DEBUG' # set log level
+      - '--accesslog=true' # enable access logs
+      - '--accessLog.filePath=/var/log/access.log' # set access log path
+      # - '--accessLog.format='
+      - '--providers.file.directory=/traefik/dynamic' # use dynamic config files
+      - '--entryPoints.http.address=:80' # listen on 80
+      - '--entryPoints.https.address=:443' # listen on 443
+      - '--entryPoints.traefik.address=:8080' # listen on 8080
+      # redirect http to https
+      - '--entryPoints.http.http.redirections.entryPoint.to=https'
+      - '--entryPoints.http.http.redirections.entryPoint.scheme=https'
+      - '--serversTransport.insecureSkipVerify=true' # disable certificate verification for load balance endpoints
+    # user: '${USER_ID}:${GROUP_ID}'
+    ports:
+      - '8008:80' # HTTP port
+      - '8008:80/udp' # HTTP port
+      - '4443:443' # HTTPS port
+      - '4443:443/udp' # HTTPS port
+      - '3000:8080' # dashboard
+      - '3000:8080/udp' # dashboard
+    networks:
+      - nginx-net
+    volumes:
+      # TODO: don't pass in the socket. start here https://doc.traefik.io/traefik/providers/docker/#docker-api-access
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/letsencrypt/live:/etc/ssl-certs/live:ro
+      - /etc/letsencrypt/archive:/etc/ssl-certs/archive:ro
+      - ./files/traefik/dynamic:/traefik/dynamic
+      - /var/log/traefik:/var/log
+    environment:
+      TRAEFIK_BASIC_AUTH_CREDS: '${TRAEFIK_BASIC_AUTH_CREDS}'
+    healthcheck:
+      test: 'traefik healthcheck --ping'
+    restart: 'unless-stopped'
+
+  crowdsec:
+    image: docker.io/crowdsecurity/crowdsec:latest
+    networks:
+      - crowdsec-net
+      - gotify-net
+    volumes:
+      # - ./files/crowdsec/config.yaml:/etc/crowdsec/config.yaml:ro
+      - ./files/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      # - ./files/crowdsec/notifications:/etc/crowdsec/notifications:ro
+      - /usr/local/etc/docker-crowdsec/online_api_credentials.yaml:/etc/crowdsec/online_api_credentials.yaml:ro
+      - /usr/local/etc/docker-crowdsec/local_api_credentials.yaml:/etc/crowdsec/local_api_credentials.yaml
+      - /usr/local/etc/docker-crowdsec/crowdsec.db:/var/lib/crowdsec/data/crowdsec.db
+      - ./files/crowdsec/parsers/s02-enrich/nextcloud-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/nextcloud-whitelist.yaml:ro
+      - ./files/crowdsec/parsers/s02-enrich/kavita-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/kavita-whitelist.yaml:ro
+
+      - /var/log/firewall:/logs/firewall:ro
+      - /var/log/messages:/logs/messages:ro
+      - /var/log/samba:/logs/samba:ro
+      - /var/log/traefik:/logs/traefik:ro
+    environment:
+      TZ: '${TIMEZONE}'
+      COLLECTIONS: >-
+        crowdsecurity/linux
+        crowdsecurity/nginx
+      # PARSERS: >-
+      #   crowdsecurity/whitelists
+      # LEVEL_DEBUG: 'true'
+    # healthcheck:
+    #   test: 'curl --fail http://localhost:8080/health'
+    restart: 'unless-stopped'
+  crowdsec-bouncer-traefik:
+    image: docker.io/fbonalair/traefik-crowdsec-bouncer
+    networks:
+      - nginx-net
+      - crowdsec-net
+    environment:
+      CROWDSEC_AGENT_HOST: 'crowdsec:8080'
+      CROWDSEC_BOUNCER_API_KEY: '${CROWDSEC_BOUNCERS_TRAEFIK}'
+      GIN_MODE: 'release'
+    # healthcheck:
+    #   test: 'curl --fail http://localhost:8080/api/v1/ping'
+    restart: 'unless-stopped'
+
+  netdata:
+    image: docker.io/netdata/netdata:v1
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.netdata.rule: 'Host(`netdata.oc.powell.place`)'
+      traefik.http.routers.netdata.tls: 'true'
+      traefik.http.routers.netdata.middlewares: 'hsts@file,crowdsec@file,authentik-traefik-admin-oauth@docker'
+      traefik.http.services.netdata.loadbalancer.server.port: '19999'
+      traefik.http.services.netdata.loadbalancer.healthcheck.path: '/'
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./files/netdata/netdata.conf:/etc/netdata/netdata.conf
+    environment:
+      PGID: 970 # docker group
+    ports:
+      - '19999'
+    networks:
+      - nginx-net
+    restart: 'unless-stopped'
+
+  openldap:
+    image: docker.io/osixia/openldap:stable
+    hostname: 'ldap.powell.place'
+    #domainname: 'ldap.orleans.io'
+    volumes:
+      - /usr/local/etc/docker-openldap:/var/lib/ldap
+      - /usr/local/lib/docker-openldap:/etc/ldap/slapd.d
+      - /etc/letsencrypt:/container/service/slapd/assets/certs:ro
+    environment:
+      #LDAP_LOG_LEVEL: '-1'
+      LDAP_ORGANISATION: 'Powell'
+      LDAP_DOMAIN: 'powell.place'
+      #LDAP_BASE_DN: 'dc=powell,dc=place'
+      LDAP_TLS: 'true'
+      LDAP_TLS_CRT_FILENAME: 'live/powell.place-0001/cert.pem'
+      LDAP_TLS_KEY_FILENAME: 'live/powell.place-0001/privkey.pem'
+      LDAP_TLS_CA_CRT_FILENAME: 'live/powell.place-0001/fullchain.pem'
+      #LDAP_TLS_ENFORCE: 'true'
+      #DISABLE_CHOWN: 'true'
+      LDAP_ADMIN_PASSWORD: '${LDAP_ADMIN_PASSWORD}'
+      LDAP_CONFIG_PASSWORD: '${LDAP_CONFIG_PASSWORD}'
+      LDAP_USER: '${LDAP_ADMIN_DN}'
+    #entrypoint: /container/tool/run --loglevel=debug
+    command: --copy-service --loglevel debug --keepalive-force
+    tty: true
+    stdin_open: true
+    ports:
+      - '389:389'
+      - '636:636'
+    networks:
+      - ldap-net
+    healthcheck:
+      test: >-
+        ldapsearch -x -H ldap://localhost -b "${LDAP_BASE_DN}"
+        -D "$$(env | grep LDAP_USER | cut -d = -f2-)"
+        -w "$$(env | grep LDAP_ADMIN_PASSWORD | cut -d = -f2-)"
+        "(cn=root)" attributes 1.1 | grep "numEntries: 1"
+    restart: 'unless-stopped'
+  ldapgui:
+    image: docker.io/ldapaccountmanager/lam:7.5
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.ldapgui.rule: 'Host(`lam.powell.place`)'
+      traefik.http.routers.ldapgui.tls: 'true'
+      traefik.http.routers.ldapgui.middlewares: 'hsts@file,crowdsec@file'
+      traefik.http.services.ldapgui.loadbalancer.server.port: '80'
+    #volumes:
+    #- /usr/local/etc/docker-lam:/etc/ldap-account-manager
+    #- /usr/local/lib/docker-lam:/var/lib/ldap-account-manager
+    environment:
+      LAM_SKIP_PRECONFIGURE: 'false'
+      LDAP_SERVER: ldap://openldap:389
+      LDAP_DOMAIN: powell.place
+      LDAP_ORGANISATION: Powell
+      LDAP_ADMIN_PASSWORD: '${LDAP_ADMIN_PASSWORD}'
+      LDAP_CONFIG_PASSWORD: '${LDAP_CONFIG_PASSWORD}'
+      LDAP_USER: '${LDAP_ADMIN_DN}'
+    networks:
+      - nginx-net
+      - ldap-net
+    restart: 'unless-stopped'
+  ldap-cherry:
+    image: docker.io/smacz/ldapcherry
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.ldap-cherry.rule: 'Host(`account.orleans.io`)'
+      traefik.http.routers.ldap-cherry.tls: 'true'
+      traefik.http.routers.ldap-cherry.middlewares: 'hsts@file,crowdsec@file'
+      traefik.http.services.ldap-cherry.loadbalancer.server.port: '8080'
+    volumes:
+      - type: bind
+        source: /usr/local/etc/docker-ldap-cherry
+        target: /etc/ldapcherry
+      #- /usr/local/etc/docker-ldap-cherry:/etc/ldapcherry
+      #- /usr/local/etc/docker-ldap-cherry:/ldapcherry
+    networks:
+      - nginx-net
+      - ldap-net
+    # healthcheck:
+    #   test: 'curl --fail http://localhost:8080/'
+    restart: 'unless-stopped'
+  authentik:
+    image: 'ghcr.io/goauthentik/server:stable'
+    command: 'server'
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.authentik.rule: 'Host(`identity.orleans.io`)'
+      traefik.http.routers.authentik.tls: 'true'
+      traefik.http.routers.authentik.middlewares: 'hsts@file,crowdsec@file'
+      traefik.http.services.authentik.loadbalancer.server.port: '9000'
+    environment:
+      AUTHENTIK_SECRET_KEY: '${AUTHENTIK_SECRET_KEY}'
+
+      AUTHENTIK_REDIS__HOST: 'authentik-cache'
+      AUTHENTIK_REDIS__PASSWORD: '${AUTHENTIK_CACHE_PASSWORD}'
+
+      AUTHENTIK_POSTGRESQL__HOST: 'authentik-db'
+      AUTHENTIK_POSTGRESQL__NAME: '${AUTHENTIK_DB_NAME}'
+      AUTHENTIK_POSTGRESQL__USER: '${AUTHENTIK_DB_USERNAME}'
+      AUTHENTIK_POSTGRESQL__PASSWORD: '${AUTHENTIK_DB_PASSWORD}'
+
+      AUTHENTIK_EMAIL__HOST: '${EMAIL_SMTP_HOST}'
+      AUTHENTIK_EMAIL__PORT: '${EMAIL_SMTP_PORT}'
+      AUTHENTIK_EMAIL__USERNAME: '${EMAIL_SMTP_USERNAME}'
+      AUTHENTIK_EMAIL__PASSWORD: '${EMAIL_SMTP_PASSWORD}'
+      AUTHENTIK_EMAIL__USE_TLS: 'true'
+      AUTHENTIK_EMAIL__TIMEOUT: '10'
+      AUTHENTIK_EMAIL__FROM: 'identity@${EMAIL_SMTP_SENDER_DOMAIN}'
+    volumes:
+      - /usr/local/lib/docker-authentik/media:/media
+      - /usr/local/lib/docker-authentik/custom-templates:/templates
+    networks:
+      - authentik-net
+      - ldap-net
+      - nginx-net
+      - gotify-net
+    depends_on:
+      - authentik-db
+      - authentik-cache
+    restart: unless-stopped
+  authentik-worker:
+    image: 'ghcr.io/goauthentik/server:stable'
+    command: 'worker'
+    environment:
+      AUTHENTIK_SECRET_KEY: '${AUTHENTIK_SECRET_KEY}'
+
+      AUTHENTIK_REDIS__HOST: 'authentik-cache'
+      AUTHENTIK_REDIS__PASSWORD: '${AUTHENTIK_CACHE_PASSWORD}'
+
+      AUTHENTIK_POSTGRESQL__HOST: 'authentik-db'
+      AUTHENTIK_POSTGRESQL__NAME: '${AUTHENTIK_DB_NAME}'
+      AUTHENTIK_POSTGRESQL__USER: '${AUTHENTIK_DB_USERNAME}'
+      AUTHENTIK_POSTGRESQL__PASSWORD: '${AUTHENTIK_DB_PASSWORD}'
+
+      AUTHENTIK_EMAIL__HOST: '${EMAIL_SMTP_HOST}'
+      AUTHENTIK_EMAIL__PORT: '${EMAIL_SMTP_PORT}'
+      AUTHENTIK_EMAIL__USERNAME: '${EMAIL_SMTP_USERNAME}'
+      AUTHENTIK_EMAIL__PASSWORD: '${EMAIL_SMTP_PASSWORD}'
+      AUTHENTIK_EMAIL__USE_TLS: 'true'
+      AUTHENTIK_EMAIL__TIMEOUT: '10'
+      AUTHENTIK_EMAIL__FROM: '${EMAIL_SMTP_SENDER_NAME}@${EMAIL_SMTP_SENDER_DOMAIN}'
+    volumes:
+      - /usr/local/lib/docker-authentik/media:/media
+      - /usr/local/lib/docker-authentik/custom-templates:/templates
+    networks:
+      - authentik-net
+      - ldap-net
+    restart: unless-stopped
+  # authentik-geoip:
+  #   networks:
+  #     - authentik-net
+  #   image: 'docker.io/maxmindinc/geoipupdate:latest'
+  authentik-db:
+    image: 'docker.io/library/postgres:12'
+    command: >-
+      -c ssl=on
+      -c ssl_cert_file=/etc/ssl-certs/live/orleans.io-0001/fullchain.pem
+      -c ssl_key_file=/etc/ssl-certs/live/orleans.io-0001/privkey.pem
+    user: '${USER_ID}:${GROUP_ID}'
+    networks:
+      - authentik-net
+    environment:
+      POSTGRES_DB: '${AUTHENTIK_DB_NAME}'
+      POSTGRES_USER: '${AUTHENTIK_DB_USERNAME}'
+      POSTGRES_PASSWORD: '${AUTHENTIK_DB_PASSWORD}'
+    volumes:
+      - /usr/local/lib/docker-authentik-db:/var/lib/postgresql/data
+      - /etc/letsencrypt/live:/etc/ssl-certs/live:ro
+      - /etc/letsencrypt/archive:/etc/ssl-certs/archive:ro
+    healthcheck:
+      test: 'pg_isready --quiet --username="$$(env | grep POSTGRES_USER | cut -d = -f2)" --dbname="$$(env | grep POSTGRES_DB | cut -d = -f2)"'
+    restart: unless-stopped
+  authentik-cache:
+    image: 'docker.io/library/redis:6'
+    command: 'redis-server --requirepass "${AUTHENTIK_CACHE_PASSWORD}"'
+    environment:
+      REDIS_HOST_PASSWORD: '${AUTHENTIK_CACHE_PASSWORD}'
+    networks:
+      - authentik-net
+    healthcheck:
+      test: 'redis-cli -a "$$(env | grep REDIS_HOST_PASSWORD | cut -d = -f2)" ping'
+    restart: unless-stopped
+  authentik-traefik-admin-oauth:
+    image: 'docker.io/thomseddon/traefik-forward-auth:2'
+    labels:
+      traefik.enable: 'true'
+      traefik.http.middlewares.authentik-traefik-admin-oauth.forwardauth.address: 'http://authentik-traefik-admin-oauth:4181'
+      traefik.http.middlewares.authentik-traefik-admin-oauth.forwardauth.authResponseHeaders: 'X-Forwarded-User'
+      traefik.http.services.authentik-traefik-admin-oauth.loadbalancer.server.port: '4181'
+    networks:
+      - nginx-net
+      - authentik-net
+    environment:
+      DEFAULT_PROVIDER: 'oidc'
+      SECRET: '${AUTHENTIK_PROVIDERS_OAUTH_TRAEFIK_SECRET}'
+      PROVIDERS_OIDC_ISSUER_URL: '${AUTHENTIK_PROVIDERS_OAUTH_ADMIN_OPENID_CONFIG_ISSUER}'
+      PROVIDERS_OIDC_CLIENT_ID: '${AUTHENTIK_PROVIDERS_OAUTH_ADMIN_CLIENT_ID}'
+      PROVIDERS_OIDC_CLIENT_SECRET: '${AUTHENTIK_PROVIDERS_OAUTH_ADMIN_CLIENT_SECRET}'
+      LOGOUT_REDIRECT: '${AUTHENTIK_PROVIDERS_OAUTH_ADMIN_OPENID_LOGOUT_URL}'
+      LIFETIME: '604800'
+    # TODO: add healthcheck https://github.com/thomseddon/traefik-forward-auth/issues/243
+    # healthcheck:
+    #   test: ''
+    restart: unless-stopped
+  authentik-traefik-servarr-oauth:
+    image: 'docker.io/thomseddon/traefik-forward-auth:2'
+    labels:
+      traefik.enable: 'true'
+      traefik.http.middlewares.authentik-traefik-servarr-oauth.forwardauth.address: 'http://authentik-traefik-servarr-oauth:4181'
+      traefik.http.middlewares.authentik-traefik-servarr-oauth.forwardauth.authResponseHeaders: 'X-Forwarded-User'
+      traefik.http.services.authentik-traefik-servarr-oauth.loadbalancer.server.port: '4181'
+    networks:
+      - nginx-net
+      - authentik-net
+    environment:
+      DEFAULT_PROVIDER: 'oidc'
+      SECRET: '${AUTHENTIK_PROVIDERS_OAUTH_TRAEFIK_SECRET}'
+      PROVIDERS_OIDC_ISSUER_URL: '${AUTHENTIK_PROVIDERS_OAUTH_SERVARR_OPENID_CONFIG_ISSUER}'
+      PROVIDERS_OIDC_CLIENT_ID: '${AUTHENTIK_PROVIDERS_OAUTH_SERVARR_CLIENT_ID}'
+      PROVIDERS_OIDC_CLIENT_SECRET: '${AUTHENTIK_PROVIDERS_OAUTH_SERVARR_CLIENT_SECRET}'
+      LOGOUT_REDIRECT: '${AUTHENTIK_PROVIDERS_OAUTH_SERVARR_OPENID_LOGOUT_URL}'
+      LIFETIME: '604800'
+    # TODO: add healthcheck https://github.com/thomseddon/traefik-forward-auth/issues/243
+    # healthcheck:
+    #   test: ''
+    restart: unless-stopped
+  # authentik_proxy:
+  #   image: 'ghcr.io/goauthentik/proxy:stable'
+  #   networks:
+  #     - nginx-net
+  #     - authentik-net
+  #   environment:
+  #     AUTHENTIK_HOST: http://authentik
+  #     AUTHENTIK_HOST_BROWSER: https://identity.orleans.io
+  #     AUTHENTIK_INSECURE: 'false'
+  #     AUTHENTIK_TOKEN: '${}'
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.port: 9000
+  #     traefik.http.routers.authentik.rule: Host(`*external host that you configured in authentik*`) && PathPrefix(`/akprox/`)
+  #     traefik.http.routers.authentik.entrypoints: https
+  #     traefik.http.routers.authentik.tls: true
+  #     traefik.http.middlewares.authentik.forwardauth.address: http://authentik_proxy:9000/akprox/auth/traefik
+  #     traefik.http.middlewares.authentik.forwardauth.trustForwardHeader: true
+  #     traefik.http.middlewares.authentik.forwardauth.authResponseHeaders: Set-Cookie,X-Auth-Username,X-Auth-Groups,X-Forwarded-Email,X-Forwarded-Preferred-Username,X-Forwarded-User
+  #   restart: unless-stopped
+
+  gotify:
+    image: docker.io/gotify/server
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.gotify.rule: 'Host(`gotify.orleans.io`)'
+      traefik.http.routers.gotify.tls: 'true'
+      traefik.http.routers.gotify.middlewares: 'hsts@file,crowdsec@file'
+      traefik.http.services.gotify.loadbalancer.server.port: '8080'
+    user: '${USER_ID}:${GROUP_ID}'
+    networks:
+      - gotify-net
+      - nginx-net
+    environment:
+      GOTIFY_SERVER_PORT: 8080
+      GOTIFY_SERVER_SSL_REDIRECTTOHTTPS: 'false'
+      GOTIFY_DATABASE_DIALECT: 'postgres'
+      GOTIFY_DATABASE_CONNECTION: 'host=gotify-db port=5432 user=${GOTIFY_DB_USERNAME} dbname=${GOTIFY_DB_DB_NAME} password=${GOTIFY_DB_PASSWORD} sslmode=disable'
+    volumes:
+      - /usr/local/etc/docker-gotify:/app/data
+    depends_on:
+      - gotify-db
+    restart: 'unless-stopped'
+  gotify-db:
+    image: docker.io/library/postgres:13
+    command: >-
+      -c ssl=on
+      -c ssl_cert_file=/etc/ssl-certs/live/orleans.io-0001/fullchain.pem
+      -c ssl_key_file=/etc/ssl-certs/live/orleans.io-0001/privkey.pem
+    user: '${USER_ID}:${GROUP_ID}'
+    networks:
+      - gotify-net
+    environment:
+      POSTGRES_USER: '${GOTIFY_DB_USERNAME}'
+      POSTGRES_PASSWORD: '${GOTIFY_DB_PASSWORD}'
+      POSTGRES_DB: '${GOTIFY_DB_DB_NAME}'
+    volumes:
+      - /usr/local/lib/docker-gotify-db:/var/lib/postgresql/data
+      - /etc/letsencrypt/live:/etc/ssl-certs/live:ro
+      - /etc/letsencrypt/archive:/etc/ssl-certs/archive:ro
+    healthcheck:
+      test: 'pg_isready --quiet --username="$$(env | grep POSTGRES_USER | cut -d = -f2)" --dbname="$$(env | grep POSTGRES_DB | cut -d = -f2)"'
+    restart: 'unless-stopped'
+
+  watchtower:
+    image: docker.io/containrrr/watchtower
+    labels:
+      com.centurylinklabs.watchtower.lifecycle.post-update: 'docker restart base_nginx_1'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.docker/config.json:/config.json
+      - /etc/timezone:/etc/timezone:ro
+    # command: --monitor-only
+    networks:
+      - gotify-net
+    environment:
+      TZ: ${TIMEZONE}
+      WATCHTOWER_SCHEDULE: '0 0 16 * * *'
+      WATCHTOWER_INCLUDE_RESTARTING: 'true'
+      WATCHTOWER_NOTIFICATIONS: 'email gotify'
+      WATCHTOWER_NOTIFICATION_EMAIL_FROM: '${EMAIL_SMTP_SENDER_NAME}@${EMAIL_SMTP_SENDER_DOMAIN}'
+      WATCHTOWER_NOTIFICATION_EMAIL_TO: '${EMAIL_SERVER_OWNER}'
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER: '${EMAIL_SMTP_HOST}'
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: '${EMAIL_SMTP_PORT}'
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER: '${EMAIL_SMTP_USERNAME}'
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD: '${EMAIL_SMTP_PASSWORD}'
+      WATCHTOWER_NOTIFICATION_GOTIFY_URL: 'http://gotify:8080/'
+      WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: '${WATCHTOWER_GOTIFY_TOKEN}'
+      WATCHTOWER_NOTIFICATION_GOTIFY_DISABLE_TLS: 'true'
+      WATCHTOWER_NOTIFICATION_GOTIFY_TLS_SKIP_VERIFY: 'true'
+    restart: 'unless-stopped'
+
+  # vm.max_map_count must be at least 262144 for elasticsearch
+  # `sysctl -w vm.max_map_count=262144`
+  # To generate a password hash, run the following command:
+  # `docker exec -it base_docker-logs-db_1 bash -c 'bash plugins/opendistro_security/tools/hash.sh'`
+  # To update auth settings, you must run the following command:
+  # `docker exec -it base_docker-logs-db_1 bash -c 'bash plugins/opendistro_security/tools/securityadmin.sh -cd plugins/opendistro_security/securityconfig/ -icl -nhnv -cacert config/certs/root-ca.pem -cert config/certs/certificate.pem -key config/certs/odfe.key'`
+  docker-logs-db:
+    image: docker.io/amazon/opendistro-for-elasticsearch
+    labels:
+      logspout.exclude: 'true'
+    volumes:
+      - /usr/local/lib/docker-logs-db/data:/usr/share/elasticsearch/data
+      - ./files/docker-logs-db/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./files/docker-logs-db/security/config.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/config.yml
+      - ./files/docker-logs-db/security/internal_users.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/internal_users.yml
+      - ./files/docker-logs-db/security/roles_mapping.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles_mapping.yml
+      - ./files/docker-logs-db/security/certs:/usr/share/elasticsearch/config/certs
+    networks:
+      - docker-logs-net
+      - ldap-net
+    environment:
+      DISABLE_INSTALL_DEMO_CONFIG: 'true'
+      discovery.type: 'single-node'
+      bootstrap.memory_lock: 'true' # along with the memlock settings below, disables swapping
+      ES_JAVA_OPTS: '-Xms512m -Xmx512m' # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+
+      LDAP_ADMIN_DN: '${LDAP_ADMIN_DN}'
+      LDAP_ADMIN_PASSWORD: '${LDAP_ADMIN_PASSWORD}'
+      LDAP_PEOPLE_BASE_DN: '${LDAP_PEOPLE_BASE_DN}'
+      LDAP_PEOPLE_OBJ_CLASS: '${LDAP_PEOPLE_OBJ_CLASS}'
+      LDAP_PEOPLE_USERNAME_ATTR: '${LDAP_PEOPLE_USERNAME_ATTR}'
+      LDAP_PEOPLE_FULLNAME_ATTR: '${LDAP_PEOPLE_FULLNAME_ATTR}'
+      LDAP_GROUPS_BASE_DN: '${LDAP_GROUPS_BASE_DN}'
+      LDAP_GROUPS_OBJ_CLASS: '${LDAP_GROUPS_OBJ_CLASS}'
+      LDAP_CONFIG_PASSWORD: '${LDAP_CONFIG_PASSWORD}'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      # nofile:
+      #   soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+      #   hard: 65536
+    healthcheck:
+      test: "curl --fail http://localhost:9200/_cat/health -u '${DOCKER_LOGS_ELASTIC_USERS_ADMIN_USERNAME}:${DOCKER_LOGS_ELASTIC_USERS_ADMIN_PASSWORD}'"
+    restart: 'unless-stopped'
+  logspout:
+    # image: docker.io/gliderlabs/logspout
+    build:
+      context: 'files/logspout'
+      dockerfile: 'Containerfile'
+    labels:
+      logspout.exclude: 'true'
+      com.centurylinklabs.watchtower.enable: 'false'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      ROUTE_URIS: 'multiline+gelf://graylog:12201'
+      EXCLUDE_LABEL: 'logspout.exclude'
+      BACKLOG: 'false'
+      RETRY_STARTUP: 'true'
+      DOCKER_LABELS: 'true'
+    networks:
+      - docker-logs-net
+    healthcheck:
+      test: 'wget --quiet -O - http://localhost:80/health || exit 1'
+    depends_on:
+      - graylog
+    restart: 'unless-stopped'
+  graylog:
+    image: docker.io/graylog/graylog:4.0
+    labels:
+      logspout.exclude: 'true'
+      traefik.enable: 'true'
+      traefik.http.routers.graylog.rule: 'Host(`logs.oc.orleans.io`)'
+      traefik.http.routers.graylog.tls: 'true'
+      traefik.http.routers.graylog.middlewares: 'hsts@file,crowdsec@file'
+      traefik.http.services.graylog.loadbalancer.server.port: '9000'
+    volumes:
+      - /usr/local/lib/docker-logs-graylog/data:/usr/share/graylog/data/journal
+    networks:
+      - docker-logs-net
+      - nginx-net
+      - ldap-net
+    environment:
+      GRAYLOG_PASSWORD_SECRET: '${DOCKER_LOGS_ELASTIC_USERS_GRAYLOG_PASSWORD}'
+      GRAYLOG_ROOT_PASSWORD_SHA2: '${DOCKER_LOGS_ELASTIC_USERS_GRAYLOG_PASSWORD_SHA}'
+      GRAYLOG_HTTP_EXTERNAL_URI: 'https://logs.oc.orleans.io/'
+      # GRAYLOG_TRUSTED_PROXIES: 'nginx'
+      GRAYLOG_ELASTICSEARCH_HOSTS: 'http://${DOCKER_LOGS_ELASTIC_USERS_GRAYLOG_USERNAME}:${DOCKER_LOGS_ELASTIC_USERS_GRAYLOG_PASSWORD}@docker-logs-db:9200'
+      GRAYLOG_ELASTICSEARCH_SHARDS: 1
+      GRAYLOG_ELASTICSEARCH_REPLICAS: 0
+      GRAYLOG_MONGODB_URI: 'mongodb://graylog-db/graylog'
+    entrypoint: /usr/bin/tini -- wait-for-it docker-logs-db:9200 -- /docker-entrypoint.sh
+    depends_on:
+      - docker-logs-db
+    restart: 'unless-stopped'
+  graylog-db:
+    image: docker.io/library/mongo:4
+    networks:
+      - docker-logs-net
+    volumes:
+      - /usr/local/lib/docker-logs-db-mongo:/data/db
+    healthcheck:
+      test: "mongo --eval 'db.runCommand({serverStatus:1}).ok' | grep 1"
+    restart: 'unless-stopped'
+
+  uptime-kuma:
+    image: 'docker.io/louislam/uptime-kuma:1'
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.uptime-kuma.rule: 'Host(`uptime.orleans.io`) || Host(`status.orleans.io`)'
+      traefik.http.routers.uptime-kuma.tls: 'true'
+      traefik.http.routers.uptime-kuma.middlewares: 'hsts@file,crowdsec@file,authentik-traefik-admin-oauth@docker,uptime-kuma@docker'
+      traefik.http.services.uptime-kuma.loadbalancer.server.port: '3001'
+      traefik.http.middlewares.uptime-kuma.headers.customresponseheaders.Upgrade: 'websocket'
+      traefik.http.middlewares.uptime-kuma.headers.customresponseheaders.Connection: 'upgrade'
+    # user: '${USER_ID}:${GROUP_ID}'
+    volumes:
+      - '/usr/local/lib/docker-uptime-kuma:/app/data'
+    ports:
+      - '3001:3001'
+      - '3001:3001/udp'
+    networks:
+      - uptime-net
+      - nginx-net
+      - gotify-net
+    restart: 'unless-stopped'
+
+  scrutiny-front:
+    image: docker.io/analogj/scrutiny:web
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.scrutiny.rule: 'Host(`scrutiny.orleans.io`)'
+      traefik.http.routers.scrutiny.tls: 'true'
+      traefik.http.routers.scrutiny.middlewares: 'hsts@file,crowdsec@file,authentik-traefik-admin-oauth@docker'
+      traefik.http.services.scrutiny.loadbalancer.server.port: '8080'
+    volumes:
+      - /usr/local/etc/docker-scrutiny:/scrutiny/config
+    networks:
+      - nginx-net
+      - scrutiny-net
+      - gotify-net
+    depends_on:
+      - scrutiny-back
+    healthcheck:
+      test: 'curl --silent --fail http://localhost:8080'
+    restart: 'unless-stopped'
+  scrutiny-back:
+    image: docker.io/analogj/scrutiny:collector
+    privileged: true # TODO: replace this with capacities
+    # cap_add:
+    #   - SYS_RAWIO
+    #   - SYS_ADMIN # required for NVME drives
+    volumes:
+      - /run/udev:/run/udev:ro
+      - /dev:/dev # TODO: find a better way to bind just drives
+      - /usr/local/etc/docker-scrutiny:/scrutiny/config
+    environment:
+      SCRUTINY_API_ENDPOINT: 'http://scrutiny-front:8080'
+    networks:
+      - scrutiny-net
+    restart: 'unless-stopped'
+
+  host-hostnames:
+    image: docker.io/dvdarias/docker-hoster
+    labels:
+      logspout.exclude: 'true'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+      - /etc/hosts:/tmp/hosts
+    restart: 'unless-stopped'
+
+networks:
+  nginx-net:
+  uptime-net:
+  ldap-net:
+  authentik-net:
+  crowdsec-net:
+  gotify-net:
+  docker-logs-net:
+  scrutiny-net:
+  unifi-net:
+  unifi-host-net:
+    driver: macvlan
+    driver_opts:
+      parent: 'enp4s0'
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+          gateway: 10.0.0.1`

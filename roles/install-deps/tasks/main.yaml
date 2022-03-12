@@ -1,0 +1,45 @@
+---
+# - name: add ZFS repo
+#   tags: [ system-config, packages ]
+#   become: true
+#   community.general.zypper_repository:
+#     repo: https://download.opensuse.org/repositories/filesystems/openSUSE_Leap_15.2/filesystems.repo
+#     auto_import_keys: yes
+# - name: add fish shell repo
+#   tags: [ system-config, packages ]
+#   become: true
+#   community.general.zypper_repository:
+#     repo: https://download.opensuse.org/repositories/shells:fish:release:3/openSUSE_Leap_15.2/shells:fish:release:3.repo
+#     auto_import_keys: yes
+# - name: add docker repo
+#   tags: [ system-config, packages ]
+#   become: true
+#   register: zypperout
+#   community.general.zypper_repository:
+#     repo: https://download.opensuse.org/repositories/Virtualization:containers/openSUSE_Leap_15.2/Virtualization:containers.repo
+#     auto_import_keys: yes
+#   failed_when: '"something" not in zypperout.stdout'
+- name: refresh repos
+  tags: [system-config, packages]
+  become: true
+  community.general.zypper_repository:
+    repo: '*'
+    runrefresh: yes
+- name: install packages
+  tags: [system-config, packages]
+  become: true
+  community.general.zypper:
+    state: present
+    name:
+      - docker
+      - EternalTerminal
+      - fish
+      - git
+      - lynx
+      - most
+      - podman
+      - python3-docker-compose
+      - slirp4netns
+      - tmux
+      - vim
+      - wget

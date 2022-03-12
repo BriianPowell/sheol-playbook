@@ -1,0 +1,8 @@
+- name: Deploy Server
+  hosts: localhost
+  connection: local
+  roles:
+    - install-deps
+    # - mounts
+    - dotfiles
+    # - base

@@ -1,0 +1,6 @@
+---
+- name: mount storage
+  tags: [mounts]
+  zfs:
+    name: storage
+    state: present
