@@ -1,0 +1,58 @@
+---
+- name: set vars
+  tags: [common, dotfiles]
+  set_fact:
+    dotfiles_repo_path: '~/Github/dotfiles'
+- name: clone dotfiles
+  tags: [common, dotfiles]
+  ansible.builtin.git:
+    repo: 'https://github.com/dudeofawesome/dotfiles.git'
+    dest: '{{ dotfiles_repo_path }}'
+- name: make dotfile dirs
+  tags: [common, dotfiles]
+  ansible.builtin.file:
+    path: '~/{{ item }}'
+    state: 'directory'
+    recurse: yes
+  loop:
+    - '.config/fish'
+    - '.config/fish/completions'
+    - '.config/tmux'
+    - '.vim'
+- name: link dotfiles
+  tags: [common, dotfiles]
+  ansible.builtin.file:
+    src: '{{ dotfiles_repo_path }}/{{ item }}'
+    dest: '~/{{ item }}'
+    state: link
+  loop:
+    - '.editorconfig'
+    - '.gemrc'
+    - '.tmux.conf'
+    - '.vim/vimrc'
+    - '.config/.prettierrc'
+    - '.config/fish/config.fish'
+    - '.config/fish/completions/et.fish'
+
+- name: install fisher
+  tags: [common, packages]
+  ansible.builtin.shell:
+    executable: '/usr/bin/fish'
+    cmd: 'curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher'
+    creates: '~/.config/fish/functions/fisher.fish'
+- name: install fisher plugins
+  tags: [common, packages]
+  ansible.builtin.shell:
+    executable: '/usr/bin/fish'
+    cmd: 'fisher install IlanCosman/tide@v5'
+
+- name: install vundle
+  tags: [common, packages]
+  ansible.builtin.git:
+    repo: 'https://github.com/VundleVim/Vundle.vim.git'
+    dest: ~/.vim/bundle/Vundle.vim
+- name: install vundle plugins
+  tags: [common, packages]
+  register: vimout
+  command: vim +PluginInstall +qall
+  changed_when: "vimout.stdout is regex(\"('.+\\/.+') installed\", \"gm\")"

@@ -3,6 +3,4 @@
   connection: local
   roles:
     - install-deps
-    # - mounts
-    - dotfiles
     # - base

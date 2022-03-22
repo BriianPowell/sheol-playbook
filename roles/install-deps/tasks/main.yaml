@@ -1,45 +1,83 @@
 ---
-# - name: add ZFS repo
-#   tags: [ system-config, packages ]
-#   become: true
-#   community.general.zypper_repository:
-#     repo: https://download.opensuse.org/repositories/filesystems/openSUSE_Leap_15.2/filesystems.repo
-#     auto_import_keys: yes
-# - name: add fish shell repo
-#   tags: [ system-config, packages ]
-#   become: true
-#   community.general.zypper_repository:
-#     repo: https://download.opensuse.org/repositories/shells:fish:release:3/openSUSE_Leap_15.2/shells:fish:release:3.repo
-#     auto_import_keys: yes
-# - name: add docker repo
-#   tags: [ system-config, packages ]
-#   become: true
-#   register: zypperout
-#   community.general.zypper_repository:
-#     repo: https://download.opensuse.org/repositories/Virtualization:containers/openSUSE_Leap_15.2/Virtualization:containers.repo
-#     auto_import_keys: yes
-#   failed_when: '"something" not in zypperout.stdout'
-- name: refresh repos
-  tags: [system-config, packages]
-  become: true
-  community.general.zypper_repository:
-    repo: '*'
-    runrefresh: yes
+- name: load passwd
+  tags: [common, secrets]
+  getent:
+    database: passwd
+- name: load groups
+  tags: [common, secrets]
+  getent:
+    database: group
+- name: load inventory
+  tags: [common, secrets]
+  include_vars:
+    file: '{{ playbook_dir }}/inventory.yaml'
+    name: 'inventory'
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+- name: load variables
+  tags: [common, secrets]
+  include_vars: 'secrets.env.yaml'
+
 - name: install packages
   tags: [system-config, packages]
-  become: true
-  community.general.zypper:
+  become: yes
+  ansible.builtin.package:
     state: present
     name:
+      - crun
       - docker
       - EternalTerminal
       - fish
       - git
+      - htop
       - lynx
       - most
-      - podman
-      - python3-docker-compose
-      - slirp4netns
+      - openssl
+      - python3
       - tmux
       - vim
       - wget
+- name: install pip packages
+  tags: [system-config, packages]
+  ansible.builtin.pip:
+    state: present
+    name:
+      - docker
+- name: Set login shell to fish
+  tags: [system-config]
+  become: yes
+  ansible.builtin.shell:
+    executable: '/bin/sh'
+    cmd: 'usermod --shell "$(which fish)" "{{ ansible_user }}"'
+
+- name: Set systemd unit states
+  tags: [system-config]
+  become: yes
+  ansible.builtin.systemd: '{{ item }}'
+  loop:
+    - name: et.service
+      enabled: yes
+      state: started
+    - name: docker.service
+      enabled: yes
+      state: started
+    - name: firewalld.service
+      enabled: no
+      state: stopped
+- name: Add user to docker group
+  tags: [system-config]
+  become: yes
+  ansible.builtin.user:
+    name: '{{ ansible_user }}'
+    append: yes
+    groups: 'docker'
+  notify:
+    - 'Kill own ssh connections'
+
+- include: dotfiles.yaml
+
+# - include: 'self-signed-cert.yaml'
+- name: Setup node_exporter
+  include_role:
+    name: 'cloudalchemy.node_exporter'

@@ -209,7 +209,7 @@ services:
     command: 'server'
     labels:
       traefik.enable: 'true'
-      traefik.http.routers.authentik.rule: 'Host(`identity.orleans.io`)'
+      traefik.http.routers.authentik.rule: 'Host(`identity.powell.place`)'
       traefik.http.routers.authentik.tls: 'true'
       traefik.http.routers.authentik.middlewares: 'hsts@file,crowdsec@file'
       traefik.http.services.authentik.loadbalancer.server.port: '9000'
