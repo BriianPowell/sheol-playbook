@@ -6,7 +6,7 @@
 - name: clone dotfiles
   tags: [common, dotfiles]
   ansible.builtin.git:
-    repo: 'https://github.com/dudeofawesome/dotfiles.git'
+    repo: 'https://github.com/BriianPowell/dotfiles.git'
     dest: '{{ dotfiles_repo_path }}'
 - name: make dotfile dirs
   tags: [common, dotfiles]
@@ -15,10 +15,10 @@
     state: 'directory'
     recurse: yes
   loop:
-    - '.config/fish'
-    - '.config/fish/completions'
-    - '.config/tmux'
-    - '.vim'
+    - '/home/.config/fish'
+    - '/home/.config/fish/completions'
+    - '/home/.config/tmux'
+    - '/home/.vim'
 - name: link dotfiles
   tags: [common, dotfiles]
   ansible.builtin.file:
