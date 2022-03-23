@@ -1,6 +1,6 @@
 - name: Deploy Server
-  hosts: localhost
-  connection: local
+  hosts: sheol-server
+  tags: [server]
   roles:
     - install-deps
     # - base

@@ -1,0 +1,6 @@
+server:
+  hosts:
+    sheol-server:
+      ansible_host: doa-server
+      ansible_user: dudeofawesome
+      ansible_python_interpreter: /usr/bin/python3
