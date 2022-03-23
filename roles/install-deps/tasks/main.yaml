@@ -7,11 +7,6 @@
   tags: [common, secrets]
   getent:
     database: group
-- name: load inventory
-  tags: [common, secrets]
-  include_vars:
-    file: '{{ playbook_dir }}/inventory.yaml'
-    name: 'inventory'
 - name: load variables
   tags: [common, secrets]
   include_vars: '{{ playbook_dir }}/secrets.env.yaml'
