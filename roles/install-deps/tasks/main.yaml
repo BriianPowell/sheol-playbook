@@ -77,7 +77,6 @@
 
 - include: dotfiles.yaml
 
-# - include: 'self-signed-cert.yaml'
 - name: Setup node_exporter
   include_role:
     name: 'cloudalchemy.node_exporter'
