@@ -11,13 +11,21 @@ Ansible playbook for Sheol.
 (Destination IP)
 
 [sheol:vars]
-ansible_user=(username)
 ansible_ssh_pass=(private ssh key location)
 ```
 
 ## Useful Scripts
 
+**Ansible**
+
 ```bash
 ansible all -m ping # ping all servers in host file for connectivity
-ansible-playbook -i inventory.yaml -k playbook.yaml
+ansible all -m setup -a "filter=ansible_distribution*" # Find system variables
+ansible-playbook -i inventory.yaml -k playbook.yaml # Run the playbook
+```
+
+**k3s**
+
+```bash
+sudo k3s kubectl get nodes
 ```

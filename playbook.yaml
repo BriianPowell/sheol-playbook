@@ -1,16 +1,21 @@
 - name: Install build deps and dotfiles
-  hosts: sheol-server
+  hosts: k3s_cluster
   tags: [server, setup]
   roles:
     - build-deps
     - dotfiles
 
 - name: Setup k3s
-  hosts: sheol-server
+  hosts: master
   gather_facts: yes
   become: yes
   tags: [server, k3s]
   roles:
-    - k3s-prereq
-    - k3s-download
-    - master-node
+    - k3s/prereq
+    - k3s/download
+
+- name: Master Node
+  hosts: master
+  become: yes
+  roles:
+    - k3s/master

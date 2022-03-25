@@ -1,5 +1,9 @@
-server:
+all:
   hosts:
     master:
       ansible_host: sheol
       ansible_python_interpreter: /usr/bin/python3
+  children:
+    k3s_cluster:
+      hosts:
+        master:
