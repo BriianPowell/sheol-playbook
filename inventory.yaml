@@ -1,6 +1,5 @@
 server:
   hosts:
-    sheol-server:
+    master:
       ansible_host: sheol
-      ansible_user: boog
       ansible_python_interpreter: /usr/bin/python3
