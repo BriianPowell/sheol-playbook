@@ -3,21 +3,21 @@
   tags: [common, secrets]
   getent:
     database: passwd
+
 - name: load groups
   tags: [common, secrets]
   getent:
     database: group
+
 - name: load inventory
   tags: [common, secrets]
   include_vars:
     file: '{{ playbook_dir }}/inventory.yaml'
     name: 'inventory'
+
 - name: load variables
   tags: [common, secrets]
   include_vars: '{{ playbook_dir }}/secrets.env.yaml'
-- name: load variables
-  tags: [common, secrets]
-  include_vars: 'secrets.env.yaml'
 
 - name: install packages
   tags: [system-config, packages]
@@ -38,12 +38,14 @@
       - tmux
       - vim
       - wget
+
 - name: install pip packages
   tags: [system-config, packages]
   ansible.builtin.pip:
     state: present
     name:
       - docker
+
 - name: Set login shell to fish
   tags: [system-config]
   become: yes
@@ -65,6 +67,7 @@
     - name: firewalld.service
       enabled: no
       state: stopped
+
 - name: Add user to docker group
   tags: [system-config]
   become: yes

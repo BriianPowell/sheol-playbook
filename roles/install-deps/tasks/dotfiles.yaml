@@ -37,6 +37,10 @@
 
 - name: install vundle plugins
   tags: [common, packages]
-  register: vimout
   command: vim +PluginInstall +qall
-  changed_when: "vimout.stdout is regex(\"('.+\\/.+') installed\", \"gm\")"
+  register: vimout
+
+# TODO: Parse output better
+# - name: Print installed vundle plugins
+#   debug:
+#     var: vimout.stdout_lines
