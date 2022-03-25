@@ -78,8 +78,6 @@
   notify:
     - 'Kill own ssh connections'
 
-- include: dotfiles.yaml
-
 - name: Setup node_exporter
   include_role:
     name: 'cloudalchemy.node_exporter'

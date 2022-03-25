@@ -40,7 +40,7 @@
   command: vim +PluginInstall +qall
   register: vimout
 
-# TODO: Parse output better
+# # TODO: Parse output better
 # - name: Print installed vundle plugins
 #   debug:
 #     var: vimout.stdout_lines
