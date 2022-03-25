@@ -2,6 +2,12 @@
 
 Ansible playbook for Sheol.
 
+## Install Requirements
+
+``
+ansible-galaxy install -r requirements.yaml
+``
+
 ## Add Hosts
 
 **Make sure to add IP to hosts file:**

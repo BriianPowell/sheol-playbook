@@ -1,0 +1,8 @@
+---
+collections:
+  - name: community.general
+  - name: community.docker
+  - name: containers.podman
+roles:
+  - name: cloudalchemy.node_exporter
+  - name: udondan.ssh-reconnect
