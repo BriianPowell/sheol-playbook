@@ -6,7 +6,7 @@
     - dotfiles
 
 - name: Setup k3s
-  hosts: master
+  hosts: k3s_cluster
   gather_facts: yes
   become: yes
   tags: [server, k3s]
@@ -14,8 +14,14 @@
     - k3s/prereq
     - k3s/download
 
-- name: Master Node
-  hosts: master
-  become: yes
-  roles:
-    - k3s/master
+# - name: Master Node
+#   hosts: master
+#   become: yes
+#   roles:
+#     - k3s/master
+
+# - name: Agent Node
+#   hosts: agent
+#   become: yes
+#   roles:
+#     - k3s/node
