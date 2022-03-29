@@ -6,32 +6,32 @@
 
 - name: clone dotfiles
   tags: [common, dotfiles]
-  ansible.builtin.git:
+  git:
     repo: 'https://github.com/BriianPowell/dotfiles.git'
     dest: '{{ dotfiles_repo_path }}'
 
 - name: link dotfiles
-  tags: [common, dotfiles]
-  command: '{{ dotfiles_repo_path }}/link'
-  args:
+  tags: [common, packages]
+  shell:
+    cmd: ./link
     chdir: '{{ dotfiles_repo_path }}'
 
 - name: install fisher
   tags: [common, packages]
-  ansible.builtin.shell:
+  shell:
     executable: '/usr/bin/fish'
     cmd: 'curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher'
     creates: '~/.config/fish/functions/fisher.fish'
 
 - name: install fisher plugins
   tags: [common, packages]
-  ansible.builtin.shell:
+  shell:
     executable: '/usr/bin/fish'
     cmd: 'fisher update'
 
 - name: install vundle
   tags: [common, packages]
-  ansible.builtin.git:
+  git:
     repo: 'https://github.com/VundleVim/Vundle.vim.git'
     dest: ~/.vim/bundle/Vundle.vim
 

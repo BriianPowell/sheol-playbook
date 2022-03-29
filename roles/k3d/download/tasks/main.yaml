@@ -1,0 +1,14 @@
+---
+- name: download k3d install script
+  get_url:
+    url: https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh
+    dest: /usr/local/bin/k3d-install.sh
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_facts.architecture == "x86_64"
+
+- name: install k3d
+  shell:
+    cmd: k3d-install.sh
+    chdir: /usr/local/bin/
