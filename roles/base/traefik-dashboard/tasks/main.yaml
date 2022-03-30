@@ -1,0 +1,20 @@
+---
+- name: creates Ansible build directory
+  file:
+    path: /home/boog/ansible_files/traefik
+    state: directory
+
+- name: copy traefik file into place
+  ansible.builtin.copy:
+    src: ../files/dashboard.yaml
+    dest: /home/boog/ansible_files/traefik/dashboard.yaml
+
+- name: expose traefik
+  become: yes
+  shell:
+    cmd: kubectl apply -f /home/boog/ansible_files/traefik/dashboard.yaml
+  register: kubectl_traefik
+
+- name: Print k3d cluster list
+  debug:
+    var: kubectl_traefik.stdout
