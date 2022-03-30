@@ -12,3 +12,35 @@
   shell:
     cmd: k3d-install.sh
     chdir: /usr/local/bin/
+  when: ansible_facts.architecture == "x86_64"
+
+
+- name: Get latest stable kubectl version
+  shell:
+    cmd: curl -L -s https://dl.k8s.io/release/stable.txt
+  register: kubectl_version
+  when: ansible_facts.architecture == "x86_64"
+
+# - name: Print latest stable kubectl version
+#   debug:
+#     var: kubectl_version.stdout_lines[0]
+
+- name: Get latest kubectl checksum
+  shell:
+    cmd: curl -L -s "https://dl.k8s.io/{{ kubectl_version.stdout_lines[0] }}/bin/linux/amd64/kubectl.sha256"
+  register: kubectl_checksum
+  when: ansible_facts.architecture == "x86_64"
+
+# - name: Print latest kubectl checksum
+#   debug:
+#     var: kubectl_checksum.stdout
+
+- name: download kubectl
+  get_url:
+    url: https://dl.k8s.io/release/{{ kubectl_version.stdout_lines[0] }}/bin/linux/amd64/kubectl
+    checksum: sha256:{{ kubectl_checksum.stdout }}
+    dest: /usr/local/bin/kubectl
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_facts.architecture == "x86_64"

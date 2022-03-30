@@ -5,31 +5,31 @@
     - build-deps
     - dotfiles
 
-- name: Setup k3d
-  hosts: master
-  gather_facts: yes
-  become: yes
-  tags: [server, k3d]
-  roles:
-    - k3d/download
-
-# - name: Setup k3s
-#   hosts: k3s_cluster
+# - name: Setup k3d
+#   hosts: master
 #   gather_facts: yes
 #   become: yes
-#   tags: [server, k3s]
+#   tags: [server, k3d]
 #   roles:
-#     - k3s/prereq
-#     - k3s/download
+#     - k3d/download
+#     - k3d/create
 
-# - name: Master Node
-#   hosts: master
-#   become: yes
-#   roles:
-#     - k3s/master
-#     -
+- name: Setup k3s
+  hosts: k3s_cluster
+  gather_facts: yes
+  become: yes
+  tags: [server, k3s]
+  roles:
+    - k3s/prereq
+    - k3s/download
 
-# - name: Agent Node
+- name: k3s Master Node
+  hosts: master
+  become: yes
+  roles:
+    - k3s/master
+
+# - name: k3s Agent Node
 #   hosts: agent
 #   become: yes
 #   roles:

@@ -30,8 +30,8 @@ ansible all -m setup -a "filter=ansible_distribution*" # Find system variables
 ansible-playbook -i inventory.yaml -k playbook.yaml # Run the playbook
 ```
 
-**k3s**
+**k3d**
 
 ```bash
-sudo k3s kubectl get nodes
+kubectl get nodes
 ```
