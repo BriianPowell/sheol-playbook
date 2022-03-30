@@ -14,6 +14,7 @@
     cmd: k3d cluster create Inferno -s 1 -a 1
   when: k3d_cluster.stdout.find('Inferno') == -1
 
+# TODO: Get this to work correctly, doesn't copy config
 - name: update kubectl config
   shell:
     cmd: k3d kubeconfig merge Inferno --kubeconfig-merge-default

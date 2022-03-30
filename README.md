@@ -1,12 +1,12 @@
-# sheol-playbook
+# Sheol Ansible Playbook
 
-Ansible playbook for Sheol.
+Ansible playbook for the Sheol server. This playbook creates a k3s.io cluster and deploys services to it.
 
 ## Install Requirements
 
-``
+```bash
 ansible-galaxy install -r requirements.yaml
-``
+```
 
 ## Add Hosts
 
@@ -20,9 +20,21 @@ ansible-galaxy install -r requirements.yaml
 ansible_ssh_pass=(private ssh key location)
 ```
 
+## k3s vs k3d considerations
+
+### k3d
+
+- Runs in docker, can deploy multiple agents on the same machine
+- can be a resource hog
+
+### k3s
+
+- runs agent and master on same machine
+- use kubectl to deploy namespaces
+
 ## Useful Scripts
 
-**Ansible**
+### Ansible
 
 ```bash
 ansible all -m ping # ping all servers in host file for connectivity
@@ -30,7 +42,9 @@ ansible all -m setup -a "filter=ansible_distribution*" # Find system variables
 ansible-playbook -i inventory.yaml -k playbook.yaml # Run the playbook
 ```
 
-**k3d**
+ansible all -m setup -a "filter=ansible_env*"
+
+### k3s
 
 ```bash
 kubectl get nodes

@@ -3,6 +3,7 @@ collections:
   - name: community.general
   - name: community.docker
   - name: containers.podman
+  - name: kubernetes.core
 roles:
   - name: cloudalchemy.node_exporter
   - name: udondan.ssh-reconnect
