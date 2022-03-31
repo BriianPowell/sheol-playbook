@@ -18,6 +18,6 @@
   delegate_to: 127.0.0.1
   register: kubectl_traefik
 
-# - name: Print k3d cluster list
-#   debug:
-#     var: kubectl_traefik.stdout
+- name: Print k3d cluster list
+  debug:
+    var: kubectl_traefik.stdout
