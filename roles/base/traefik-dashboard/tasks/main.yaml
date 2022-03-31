@@ -1,20 +1,23 @@
 ---
-- name: creates Ansible build directory
-  file:
-    path: /home/boog/ansible_files/traefik
-    state: directory
+# - debug:
+#     msg: "{{ lookup('env', 'PWD') }}"
 
-- name: copy traefik file into place
-  ansible.builtin.copy:
-    src: ../files/dashboard.yaml
-    dest: /home/boog/ansible_files/traefik/dashboard.yaml
+- name: copy traefik config file to manifests
+  become: true
+  copy:
+    src: ../files/traefik-config.yaml
+    dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: expose traefik
-  become: yes
   shell:
-    cmd: kubectl apply -f /home/boog/ansible_files/traefik/dashboard.yaml
+    cmd: kubectl apply -f files/dashboard.yaml
+    chdir: /mnt/f/_code/sheol-playbook/roles/base/traefik-dashboard
+  delegate_to: 127.0.0.1
   register: kubectl_traefik
 
-- name: Print k3d cluster list
-  debug:
-    var: kubectl_traefik.stdout
+# - name: Print k3d cluster list
+#   debug:
+#     var: kubectl_traefik.stdout

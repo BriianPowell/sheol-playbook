@@ -48,4 +48,17 @@ ansible all -m setup -a "filter=ansible_env*"
 
 ```bash
 kubectl get nodes
+kubectl get service --all-namespaces 
+kubectl get pod -n kube-system
+kubectl get endpoints -n kube-system
 ```
+
+**Get access to your cluster through kubectl:**
+
+```bash
+scp boog@10.0.0.10:~/.kube/config ~/.kube/config
+```
+
+### References
+
+- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
