@@ -1,6 +1,6 @@
 # Sheol Ansible Playbook
 
-Ansible playbook for the Sheol server. This playbook creates a k3s.io cluster and deploys services to it.
+Ansible playbook for the Sheol server. This playbook creates a [k3s.io](https://k3s.io/) cluster and deploys services to it.
 
 ## Install Requirements
 
@@ -20,6 +20,33 @@ ansible-galaxy install -r requirements.yaml
 ansible_ssh_pass=(private ssh key location)
 ```
 
+## Useful Scripts
+
+### Ansible
+
+```bash
+ansible all -m ping # ping all servers in host file for connectivity
+ansible all -m setup -a "filter=ansible_distribution*" # Find system variables
+ansible-playbook -i inventory.yaml playbook.yaml # Run the playbook
+ansible-playbook -i inventory.yaml reset.yaml # reset k3s service
+```
+
+### kubectl
+
+**Should be run from local machine**
+
+```bash
+scp boog@10.0.0.10:~/.kube/config ~/.kube/config
+```
+
+```bash
+kubectl get nodes
+kubectl get service --all-namespaces 
+kubectl get pod -n kube-system
+kubectl get endpoints -n kube-system
+kubectl get addon -A
+```
+
 ## k3s vs k3d considerations
 
 ### k3d
@@ -32,33 +59,7 @@ ansible_ssh_pass=(private ssh key location)
 - runs agent and master on same machine
 - use kubectl to deploy namespaces
 
-## Useful Scripts
+## References
 
-### Ansible
-
-```bash
-ansible all -m ping # ping all servers in host file for connectivity
-ansible all -m setup -a "filter=ansible_distribution*" # Find system variables
-ansible-playbook -i inventory.yaml -k playbook.yaml # Run the playbook
-```
-
-ansible all -m setup -a "filter=ansible_env*"
-
-### k3s
-
-```bash
-kubectl get nodes
-kubectl get service --all-namespaces 
-kubectl get pod -n kube-system
-kubectl get endpoints -n kube-system
-```
-
-**Get access to your cluster through kubectl:**
-
-```bash
-scp boog@10.0.0.10:~/.kube/config ~/.kube/config
-```
-
-### References
-
-- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+- <https://kubernetes.io/docs/reference/kubectl/cheatsheet/>
+- <https://github.com/cert-manager/cert-manager>
