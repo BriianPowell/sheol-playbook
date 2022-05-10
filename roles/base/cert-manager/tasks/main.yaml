@@ -23,6 +23,10 @@
 #   debug:
 #     var: kubectl_cert.stdout
 
+# TODO:
+# Set Up Authentication with Traefik and k3s
+# https://k3s.rocks/https-cert-manager-letsencrypt/
+
 - name: install cert manager
   shell:
     cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml
