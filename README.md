@@ -41,7 +41,7 @@ scp boog@10.0.0.10:~/.kube/config ~/.kube/config
 
 ```bash
 kubectl get nodes
-kubectl get service --all-namespaces 
+kubectl get service --all-namespaces
 kubectl get pod -n kube-system
 kubectl get endpoints -n kube-system
 kubectl get addon -A
@@ -63,3 +63,12 @@ kubectl get addon -A
 
 - <https://kubernetes.io/docs/reference/kubectl/cheatsheet/>
 - <https://github.com/cert-manager/cert-manager>
+
+## Gotchyas
+
+May need to add to your shell config:
+
+```bash
+set -Ux DISABLE_SPRING true
+set -Ux OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
+```

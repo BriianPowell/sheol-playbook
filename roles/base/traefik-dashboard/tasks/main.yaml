@@ -1,7 +1,4 @@
 ---
-# - debug:
-#     msg: "{{ lookup('env', 'PWD') }}"
-
 - name: copy traefik config file to manifests
   become: true
   copy:
@@ -14,7 +11,7 @@
 - name: expose traefik
   shell:
     cmd: kubectl apply -f files/dashboard.yaml
-    chdir: /mnt/f/_code/sheol-playbook/roles/base/traefik-dashboard
+    chdir: '{{ playbook_dir }}/roles/base/traefik-dashboard'
   delegate_to: 127.0.0.1
   register: kubectl_traefik
 

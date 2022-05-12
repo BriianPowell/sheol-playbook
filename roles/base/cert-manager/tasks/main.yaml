@@ -3,9 +3,10 @@
   tags: [common, secrets]
   include_vars: '{{ playbook_dir }}/secrets.env.yaml'
 
-- name: check ij cert manager exists
+- name: check if cert manager exists
   shell:
     cmd: kubectl get service --all-namespaces
+  delegate_to: 127.0.0.1
   register: kubectl_namespaces
 
 # - name: Print kubectl get service --all-namespaces
@@ -23,24 +24,30 @@
 #   debug:
 #     var: kubectl_cert.stdout
 
-# TODO:
-# Set Up Authentication with Traefik and k3s
-# https://k3s.rocks/https-cert-manager-letsencrypt/
-
-- name: install cert manager
+- name: LetsEncrypt Production ClusterIssuer
   shell:
-    cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml
+    cmd: cat files/lets-encrypt.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/base/cert-manager'
+  environment:
+    EMAIL: '{{ email.server_owner }}'
   delegate_to: 127.0.0.1
-  register: kubectl_cert
-  when: kubectl_namespaces.stdout.find('cert-manager') == -1
-
-- name: expose traefik
-  shell:
-    cmd: kubectl apply -f files/lets-encrypt.yaml
-    chdir: /mnt/f/_code/sheol-playbook/roles/base/cert-manager
-  delegate_to: 127.0.0.1
-  register: kubectl_traefik
+  register: kubectl_letsencrypt
 
 # - name: Print kubectl apply output
 #   debug:
-#     var: kubectl_cert.stdout
+#     var: kubectl_letsencrypt.stdout
+
+- name: request wilcard cert
+  shell:
+    cmd: kubectl apply -f files/wildcard-place.yaml
+    chdir: '{{ playbook_dir }}/roles/base/cert-manager'
+  delegate_to: 127.0.0.1
+  register: kubectl_wildcard
+
+- name: Print kubectl apply output
+  debug:
+    var: kubectl_wildcard.stdout
+
+# TODO:
+# Set Up Authentication with Traefik and k3s
+# https://k3s.rocks/https-cert-manager-letsencrypt/
