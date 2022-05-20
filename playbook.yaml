@@ -41,5 +41,4 @@
   environment:
     KUBECONFIG: '{{ kubeconfig }}'
   roles:
-    - base/traefik-dashboard
-    - base/cert-manager
+    - base/traefik

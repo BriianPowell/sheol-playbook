@@ -4,9 +4,12 @@ metadata:
   name: wildcard-powell-place
   namespace: kube-system
 spec:
-  secretName: wildcard-powell-place-tls
+  secretName: wildcard-powell-place-secret
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-issuer
     kind: ClusterIssuer
   dnsNames:
-    - "*.powell.place"
+    - '*.powell.place'
+    - powell.place
+  privateKey:
+    rotationPolicy: Always
