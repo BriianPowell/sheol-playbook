@@ -35,10 +35,3 @@
 #   become: yes
 #   roles:
 #     - k3s/node
-
-- name: Begin Base
-  hosts: master
-  environment:
-    KUBECONFIG: '{{ kubeconfig }}'
-  roles:
-    - base/traefik
