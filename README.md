@@ -15,9 +15,6 @@ ansible-galaxy install -r requirements.yaml
 ```ini
 [sheol]
 (Destination IP)
-
-[sheol:vars]
-ansible_ssh_pass=(private ssh key location)
 ```
 
 ## Useful Scripts

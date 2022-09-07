@@ -25,7 +25,7 @@
     - k3s/download
 
 - name: k3s Master Node
-  hosts: master
+  hosts: sheol
   become: yes
   roles:
     - k3s/master

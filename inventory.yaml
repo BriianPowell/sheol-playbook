@@ -1,7 +1,7 @@
 all:
   hosts:
-    master:
-      ansible_host: sheol
+    sheol:
+      ansible_host: 10.0.0.10
       ansible_python_interpreter: /usr/bin/python3
     # agent:
     #   ansible_host:
@@ -9,5 +9,5 @@ all:
   children:
     k3s_cluster:
       hosts:
-        master:
+        sheol:
         # agent:

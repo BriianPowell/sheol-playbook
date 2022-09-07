@@ -1,0 +1,70 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: check if cert manager exists
+  shell:
+    cmd: kubectl get service --all-namespaces
+  delegate_to: 127.0.0.1
+  register: kubectl_namespaces
+
+# - name: Print kubectl get service --all-namespaces
+#   debug:
+#     var: kubectl_namespaces.stdout
+
+- name: install cert manager
+  shell:
+    cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+  delegate_to: 127.0.0.1
+  register: kubectl_cert
+  when: kubectl_namespaces.stdout.find('cert-manager') == -1
+
+# - name: Print kubectl apply output
+#   debug:
+#     var: kubectl_cert.stdout
+
+- name: create LetsEncrypt ClusterIssuer
+  shell:
+    cmd: cat files/lets-encrypt.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/base/traefik'
+  environment:
+    EMAIL: '{{ email.server_owner }}'
+    API_TOKEN: '{{ cloudflare.api_token }}'
+  delegate_to: 127.0.0.1
+  register: kubectl_letsencrypt
+
+- name: Print kubectl apply output
+  debug:
+    var: kubectl_letsencrypt.stdout
+
+- name: request wilcard cert
+  shell:
+    cmd: kubectl apply -f files/wildcard-cert.yaml
+    chdir: '{{ playbook_dir }}/roles/base/traefik'
+  delegate_to: 127.0.0.1
+  register: kubectl_wildcard
+
+- name: Print kubectl apply output
+  debug:
+    var: kubectl_wildcard.stdout
+
+- name: copy traefik config file to manifests
+  become: true
+  copy:
+    src: ../files/traefik-config.yaml
+    dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: expose traefik
+  shell:
+    cmd: kubectl apply -f files/dashboard.yaml
+    chdir: '{{ playbook_dir }}/roles/base/traefik'
+  delegate_to: 127.0.0.1
+  register: kubectl_traefik
+
+- name: Print kubectl apply output
+  debug:
+    var: kubectl_traefik.stdout
