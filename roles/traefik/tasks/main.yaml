@@ -27,7 +27,7 @@
 - name: create LetsEncrypt ClusterIssuer
   shell:
     cmd: cat files/lets-encrypt.yaml | envsubst | kubectl apply -f -
-    chdir: '{{ playbook_dir }}/roles/base/traefik'
+    chdir: '{{ playbook_dir }}/roles/traefik'
   environment:
     EMAIL: '{{ email.server_owner }}'
     API_TOKEN: '{{ cloudflare.api_token }}'
@@ -41,7 +41,7 @@
 - name: request wilcard cert
   shell:
     cmd: kubectl apply -f files/wildcard-cert.yaml
-    chdir: '{{ playbook_dir }}/roles/base/traefik'
+    chdir: '{{ playbook_dir }}/roles/traefik'
   delegate_to: 127.0.0.1
   register: kubectl_wildcard
 
@@ -61,7 +61,7 @@
 - name: expose traefik
   shell:
     cmd: kubectl apply -f files/dashboard.yaml
-    chdir: '{{ playbook_dir }}/roles/base/traefik'
+    chdir: '{{ playbook_dir }}/roles/traefik'
   delegate_to: 127.0.0.1
   register: kubectl_traefik
 
