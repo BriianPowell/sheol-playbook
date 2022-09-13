@@ -42,19 +42,8 @@ kubectl get service --all-namespaces
 kubectl get pod -n kube-system
 kubectl get endpoints -n kube-system
 kubectl get addon -A
+kubectl rollout restart deployment traefik -n kube-system
 ```
-
-## k3s vs k3d considerations
-
-### k3d
-
-- Runs in docker, can deploy multiple agents on the same machine
-- can be a resource hog
-
-### k3s
-
-- runs agent and master on same machine
-- use kubectl to deploy namespaces
 
 ## References
 

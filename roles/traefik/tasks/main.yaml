@@ -29,8 +29,8 @@
     cmd: cat files/lets-encrypt.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/traefik'
   environment:
-    EMAIL: '{{ email.server_owner }}'
-    API_TOKEN: '{{ cloudflare.api_token }}'
+    EMAIL: '{{ email.server_owner }'
+    API_TOKEN: '{{ cloudflare.api_token_base64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_letsencrypt
 
@@ -60,11 +60,22 @@
 
 - name: expose traefik
   shell:
-    cmd: kubectl apply -f files/dashboard.yaml
+    cmd: kubectl apply -f files/traefik-dashboard.yaml
     chdir: '{{ playbook_dir }}/roles/traefik'
   delegate_to: 127.0.0.1
-  register: kubectl_traefik
+  register: kubectl_traefik_dashboard
 
 - name: Print kubectl apply output
   debug:
-    var: kubectl_traefik.stdout
+    var: kubectl_traefik_dashboard.stdout
+
+- name: force Https
+  shell:
+    cmd: kubectl apply -f files/traefik-https.yaml
+    chdir: '{{ playbook_dir }}/roles/traefik'
+  delegate_to: 127.0.0.1
+  register: kubectl_traefik_http
+
+- name: Print kubectl apply output
+  debug:
+    var: kubectl_traefik_http.stdout
