@@ -8,8 +8,11 @@ spec:
     dashboard:
       enabled: true
     ports:
-      traefik:
-        expose: true # this is not recommended in production deployments, but I want to be able to see my dashboard locally
+      websecure:
+        tls:
+          enabled: true
+      web:
+        redirectTo: websecure
     logs:
       access:
         enabled: true

@@ -13,6 +13,9 @@
 #   debug:
 #     var: kubectl_namespaces.stdout
 
+# TODO: Write Ansible/Helm Script to Install Kubed Secret Sharing
+# https://ruzickap.github.io/k8s-harbor/part-03/#install-kubed
+
 - name: install cert manager
   shell:
     cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.yaml
@@ -60,7 +63,7 @@
 
 - name: expose traefik
   shell:
-    cmd: kubectl apply -f files/traefik-dashboard.yaml
+    cmd: kubectl apply -f files/traefik-ingress.yaml
     chdir: '{{ playbook_dir }}/roles/traefik'
   delegate_to: 127.0.0.1
   register: kubectl_traefik_dashboard
@@ -71,7 +74,7 @@
 
 - name: force Https
   shell:
-    cmd: kubectl apply -f files/traefik-https.yaml
+    cmd: kubectl apply -f files/traefik-tls.yaml
     chdir: '{{ playbook_dir }}/roles/traefik'
   delegate_to: 127.0.0.1
   register: kubectl_traefik_http
