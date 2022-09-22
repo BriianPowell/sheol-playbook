@@ -58,39 +58,41 @@ spec:
         args: ["start"]
         env:
         - name: KEYCLOAK_ADMIN
-          value: "admin"
+          value: ${KC_ADMN}
         - name: KEYCLOAK_ADMIN_PASSWORD
-          value: "DoPsqc9Mc7xBZJFZgrQC"
+          value: ${KC_PASS}
         - name: KC_PROXY
-          value: "edge"
+          value: edge
         - name: KC_HOSTNAME
-          value: keycloak.powell.place
+          value: ${KC_HOST}
         - name: KC_HEALTH_ENABLED
           value: "true"
         - name: KC_METRICS_ENABLED
           value: "true"
+        - name: KC_SPI_ADMIN_REALM
+          value: inferno
+        - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+          value: "true"
         - name: KC_DB
-          value: "postgres"
+          value: postgres
         - name: KC_DB_URL_HOST
-          value: "keycloak-postgres-db"
+          value: keycloak-postgres-db
         - name: KC_DB_URL_DATABASE
-          value: "keycloak"
+          value: ${PG_DB}
         - name: KC_DB_URL_PORT
           value: "5432"
         - name: KC_DB_USERNAME
-          value: "root"
+          value: ${PG_USER}
         - name: KC_DB_PASSWORD
-          value: "LA6nDawJoPhTLDT9GqQu"
-        - name: KC_HTTP_RELATIVE_PATH
-          value: "/auth"
-        - name: KC_SPI_ADMIN_REALM
-          value: "inferno"
+          value: ${PG_PASS}
         ports:
         - name: http
           containerPort: 8080
         readinessProbe:
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
           httpGet:
-            path: /auth/realms/inferno
+            path: /realms/inferno
             port: 8080
 
 # Reference: https://github.com/keycloak/keycloak/discussions/12594

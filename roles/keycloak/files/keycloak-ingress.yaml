@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`keycloak.powell.place`) && PathPrefix(`/auth`)
+    - match: Host(`keycloak.powell.place`)
       kind: Rule
       services:
         - name: keycloak
