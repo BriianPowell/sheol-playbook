@@ -13,9 +13,5 @@
 #   debug:
 #     var: kubectl_namespaces.stdout
 
-- name: install keycloak
-  shell:
-    cmd: kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml
-  delegate_to: 127.0.0.1
-  register: kubectl_cert
-  when: kubectl_namespaces.stdout.find('cert-manager') == -1
+# TODO: Create Keycloak Namespace
+# Finish the Keycloak Setup Steps

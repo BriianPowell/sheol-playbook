@@ -2,10 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: keycloak-postgres-db
+  namespace: keycloak
 spec:
   selector:
-    app: keycloak-postgres-db
-  type: LoadBalancer
+    app: keycloak-postgressql-db
   ports:
     - name: pgql
       port: 5432
@@ -15,20 +15,21 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: keycloak-postgres-db
+  name: keycloak-postgressql-db
+  namespace: keycloak
 spec:
-  serviceName: keycloak-postgres-db
-  replicas: 1
+  serviceName: keycloak-postgressql-db-service
   selector:
     matchLabels:
-      app: keycloak-postgres-db
+      app: keycloak-postgressql-db
+  replicas: 1
   template:
     metadata:
       labels:
-        app: postgres
+        app: keycloak-postgressql-db
     spec:
       containers:
-        - name: keycloak-postgres-db
+        - name: keycloak-postgressql-db
           image: postgres:latest
           volumeMounts:
             - name: postgres-data
@@ -36,13 +37,13 @@ spec:
               subPath: pgdata
           env:
             - name: POSTGRES_USER
-              value:
+              value: root
             - name: POSTGRES_PASSWORD
-              value:
+              value: LA6nDawJoPhTLDT9GqQu
             - name: POSTGRES_DB
               value: keycloak
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pgdata #/data/pgdata
           ports:
             - containerPort: 5432
       terminationGracePeriodSeconds: 60

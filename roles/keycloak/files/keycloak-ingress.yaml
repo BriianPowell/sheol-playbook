@@ -1,31 +1,14 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: keycloak-dashboard
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-    - match: Host(`keycloak.powell.place`)
-      kind: Rule
-      services:
-        - name: keycloak
-          port: 8080
-      # middlewares:
-      #   - name: redirect-https
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
   name: keycloak-dashboard-https
-  namespace: default
+  namespace: keycloak
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`keycloak.powell.place`)
+    - match: Host(`keycloak.powell.place`) && PathPrefix(`/auth`)
       kind: Rule
       services:
         - name: keycloak
-          port: 8443
+          port: 8080
