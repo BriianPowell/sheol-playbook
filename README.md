@@ -80,14 +80,14 @@ brew install helm
 
 - [x] Traefik Dashboard
 
-- [x] Keycloak
+- [x] [Keycloak][https://github.com/keycloak/keycloak]
 
 - [x] Keycloak Forward Auth
 
-- [ ] Scrutiny
-- [ ] Gotify
-- [ ] Grafana
-- [ ] Nextcloud
+- [ ] [Scrutiny][https://github.com/AnalogJ/scrutiny]
+- [ ] [Gotify][https://github.com/gotify/server]
+- [ ] [Grafana][https://github.com/grafana/grafana]
+- [ ] [Nextcloud][https://github.com/nextcloud/server]
 
 ## References
 
