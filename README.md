@@ -30,6 +30,20 @@ ansible-playbook -i inventory.yaml reset.yaml # reset k3s service
 
 ### kubectl
 
+Install Kubectl with your preferred method:
+
+**Nix**
+
+```bash
+nix-env -iA nixpkgs.kubectl
+```
+
+**Bash**
+
+```
+brew install kubectl
+```
+
 **Should be run from local machine**
 
 ```bash
@@ -37,18 +51,18 @@ scp boog@10.0.0.10:~/.kube/config ~/.kube/config
 ```
 
 ```bash
-kubectl get nodes
-kubectl get service --all-namespaces
-kubectl get pod -n kube-system
-kubectl get endpoints -n kube-system
-kubectl rollout restart deployment traefik -n kube-system
+kubectl get nodes # get k3s instances
+kubectl get svc --all-namespaces # get all running services
+kubectl get pods --all-namespaces # get all running pods
+kubectl get endpoints --all-namespaces # get all endpoints
+kubectl rollout restart deployment traefik -n kube-system # restart a pod
 ```
 
 ### Helm
 
 Install Helm with your preferred method:
 
- **Nix**
+**Nix**
 
 ```bash
 nix-shell -p kubernetes-helm-wrapped
@@ -59,6 +73,21 @@ nix-shell -p kubernetes-helm-wrapped
 ```
 brew install helm
 ```
+
+
+
+## TODO
+
+- [x] Traefik Dashboard
+
+- [x] Keycloak
+
+- [x] Keycloak Forward Auth
+
+- [ ] Scrutiny
+- [ ] Gotify
+- [ ] Grafana
+- [ ] NextcLoud
 
 ## References
 
