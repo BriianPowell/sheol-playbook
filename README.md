@@ -87,7 +87,7 @@ brew install helm
 - [ ] Scrutiny
 - [ ] Gotify
 - [ ] Grafana
-- [ ] NextcLoud
+- [ ] Nextcloud
 
 ## References
 
