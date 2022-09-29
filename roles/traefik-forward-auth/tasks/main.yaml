@@ -1,0 +1,56 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: check if traefik-forward-auth exists
+  shell:
+    cmd: kubectl get service --all-namespaces
+  delegate_to: 127.0.0.1
+  register: kubectl_namespaces
+
+# - name: Print kubectl get service --all-namespaces
+#   debug:
+#     var: kubectl_namespaces.stdout
+
+- name: apply forward-auth configmap
+  shell:
+    cmd: cat files/forward-auth-config.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/traefik-forward-auth'
+  environment:
+    DOMAIN: '{{ domain_name }}'
+    DISC_URL: '{{ keycloak.traefik-forward-auth.discovery_url }'
+  delegate_to: 127.0.0.1
+  register: forward_auth_configmap
+
+- name: apply forward-auth secret
+  shell:
+    cmd: cat files/forward-auth-secret.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/traefik-forward-auth'
+  environment:
+    CLIENT_ID: '{{ keycloak.traefik-forward-auth.client_id_base_64 }}'
+    CLIENT_SECRET: '{{ keycloak.traefik-forward-auth.client_secret_base_64 }}'
+    SECRET: '{{ keycloak.traefik-forward-auth.auth_secrety_base64 }}'
+  delegate_to: 127.0.0.1
+  register: forward_auth_secret
+
+- name: apply forward-auth deployment
+  shell:
+    cmd: kubectl apply -f files/forward-auth.yaml
+    chdir: '{{ playbook_dir }}/roles/traefik-forward-auth'
+  delegate_to: 127.0.0.1
+  register: keycloak_postgress
+
+- name: apply forward-auth ingress and middleware
+  shell:
+    cmd: kubectl apply -f files/forward-auth-middleware.yaml
+    chdir: '{{ playbook_dir }}/roles/traefik-forward-auth'
+  delegate_to: 127.0.0.1
+  register: keycloak_serice
+
+# - name: kustomize example
+#   shell:
+#     cmd: kubectl apply -k files
+#     chdir: '{{ playbook_dir }}/roles/traefik-forward-auth'
+#   delegate_to: 127.0.0.1
+#   register: keycloak_serice

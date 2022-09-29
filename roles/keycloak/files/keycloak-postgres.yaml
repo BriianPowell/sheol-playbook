@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: keycloak-postgres-db
   namespace: keycloak
+  labels:
+    app: keycloak
 spec:
   selector:
     app: keycloak-postgressql-db
@@ -17,6 +19,8 @@ kind: StatefulSet
 metadata:
   name: keycloak-postgressql-db
   namespace: keycloak
+  labels:
+    app: keycloak
 spec:
   serviceName: keycloak-postgressql-db-service
   selector:
@@ -52,7 +56,7 @@ spec:
         name: postgres-data
       spec:
         accessModes:
-          - "ReadWriteOnce"
+          - 'ReadWriteOnce'
         resources:
           requests:
             storage: 10Gi

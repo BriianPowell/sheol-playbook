@@ -35,3 +35,15 @@
 #   become: yes
 #   roles:
 #     - k3s/node
+
+# - name: k3s traefik dashboard
+#   hosts: sheol
+#   become: yes
+#   roles:
+#     - traefik
+
+# - name: k3s keycloak
+#   hosts: sheol
+#   become: yes
+#   roles:
+#     - keycloak

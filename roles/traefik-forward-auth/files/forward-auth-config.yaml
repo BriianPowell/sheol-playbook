@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-forward-auth-config
+  namespace: kube-system
+  labels:
+    app: traefik-forward-auth
+data:
+  INSECURE_COOKIE: 'false'
+  COOKIE_DOMAIN: ${DOMAIN}
+  DOMAINS: ${DOMAIN}
+  AUTH_HOST: auth.${DOMAIN}
+  URL_PATH: /_oauth
+  DEFAULT_PROVIDER: oidc
+  PROVIDERS_OIDC_ISSUER_URL: ${DISC_URL}

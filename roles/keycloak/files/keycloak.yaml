@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: keycloak-headless
   namespace: keycloak
+  labels:
+    app: keycloak
 spec:
   clusterIP: None
   selector:
@@ -64,15 +66,13 @@ spec:
         - name: KC_PROXY
           value: edge
         - name: KC_HOSTNAME
-          value: ${KC_HOST}
+          value: keycloak.${DOMAIN}
         - name: KC_HEALTH_ENABLED
-          value: "true"
+          value: 'true'
         - name: KC_METRICS_ENABLED
-          value: "true"
+          value: 'true'
         - name: KC_SPI_ADMIN_REALM
           value: inferno
-        - name: KC_HOSTNAME_STRICT_BACKCHANNEL
-          value: "true"
         - name: KC_DB
           value: postgres
         - name: KC_DB_URL_HOST
@@ -80,7 +80,7 @@ spec:
         - name: KC_DB_URL_DATABASE
           value: ${PG_DB}
         - name: KC_DB_URL_PORT
-          value: "5432"
+          value: '5432'
         - name: KC_DB_USERNAME
           value: ${PG_USER}
         - name: KC_DB_PASSWORD

@@ -3,6 +3,8 @@ kind: IngressRoute
 metadata:
   name: keycloak-dashboard-https
   namespace: keycloak
+  labels:
+    app: keycloak
 spec:
   entryPoints:
     - websecure

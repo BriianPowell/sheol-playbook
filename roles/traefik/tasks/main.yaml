@@ -13,9 +13,6 @@
 #   debug:
 #     var: kubectl_namespaces.stdout
 
-# TODO: Write Ansible/Helm Script to Install Kubed Secret Sharing
-# https://ruzickap.github.io/k8s-harbor/part-03/#install-kubed
-
 - name: install cert manager
   shell:
     cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.yaml

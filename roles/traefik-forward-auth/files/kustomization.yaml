@@ -1,0 +1,29 @@
+#
+# Reference: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
+#
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: keycloak
+commonLabels:
+  app: traefik-forward-auth
+
+resources:
+- forward-auth-secret.yaml
+- forward-auth.yaml
+- forward-auth-middleware.yaml
+
+#
+# Configs
+#
+# configMapGenerator:
+# - name: configs
+#   files:
+#     - ./configs/traefik-forward-auth.ini
+
+#
+# Secrets
+#
+# secretGenerator:
+# - name: traefik-forward-auth-secrets
+#   env: secrets/traefik-forward-auth.env

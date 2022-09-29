@@ -60,7 +60,7 @@
 
 - name: Replace https://localhost:6443 by https://master-ip:6443
   command: >-
-    k3s kubectl config set-cluster default
+    k3s kubectl config set-cluster tartarus
       --server=https://{{ master_ip }}:6443
       --kubeconfig ~{{ ansible_user }}/.kube/config
   changed_when: true
@@ -76,3 +76,19 @@
     src: /usr/local/bin/k3s
     dest: /usr/local/bin/crictl
     state: link
+
+# Ansible/Helm Script to Install Kubed Secret Sharing
+# https://ruzickap.github.io/k8s-harbor/part-03/#install-kubed
+
+- name: helm repo update
+  shell: helm repo add appscode https://charts.appscode.com/stable/'
+  delegate_to: 127.0.0.1
+  register: helm_update
+
+- name: helm install kubed
+  shell: |
+    helm install appscode/kubed --name kubed --version 0.12.0 --namespace kube-system --wait \
+    --set config.clusterName=tartarus \
+    --set apiserver.enabled=false
+  delegate_to: 127.0.0.1
+  register: helm_kubed
