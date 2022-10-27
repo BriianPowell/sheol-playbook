@@ -88,6 +88,7 @@ brew install helm
 - [ ] [Gotify][https://github.com/gotify/server]
 - [ ] [Grafana][https://github.com/grafana/grafana]
 - [ ] [Nextcloud][https://github.com/nextcloud/server]
+- [ ] [HomeAssistant][https://www.home-assistant.io/]
 
 ## References
 

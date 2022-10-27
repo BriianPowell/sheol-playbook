@@ -1,0 +1,6 @@
+- name: apply Keycloak ingress
+  shell:
+    cmd: kubectl apply -f files/k3s-upgrade-plan.yaml
+    chdir: '{{ playbook_dir }}/roles/k3s-system-upgrade'
+  delegate_to: 127.0.0.1
+  register: k3s_upgrade

@@ -92,3 +92,9 @@
     --set apiserver.enabled=false
   delegate_to: 127.0.0.1
   register: helm_kubed
+
+- name: install system-upgrade-controller
+  shell:
+    cmd: kubectl apply -f https://github.com/rancher/system-upgrade-controller/releases/latest/download/system-upgrade-controller.yaml
+  delegate_to: 127.0.0.1
+  register: kubectl_system_upgrade_controller

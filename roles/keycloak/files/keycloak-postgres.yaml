@@ -34,18 +34,18 @@ spec:
     spec:
       containers:
         - name: keycloak-postgressql-db
-          image: postgres:latest
+          image: postgres:14.5
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
               subPath: pgdata
           env:
             - name: POSTGRES_USER
-              value: ${PG_USER}
+              value: root #${PG_USER}
             - name: POSTGRES_PASSWORD
-              value: ${PG_PASS}
+              value: LA6nDawJoPhTLDT9GqQu #${PG_PASS}
             - name: POSTGRES_DB
-              value: ${PG_DB}
+              value: keycloak #${PG_DB}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata #/data/pgdata
           ports:
