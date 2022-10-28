@@ -41,11 +41,11 @@ spec:
               subPath: pgdata
           env:
             - name: POSTGRES_USER
-              value: root #${PG_USER}
+              value: ${PG_USER}
             - name: POSTGRES_PASSWORD
-              value: LA6nDawJoPhTLDT9GqQu #${PG_PASS}
+              value: ${PG_PASS}
             - name: POSTGRES_DB
-              value: keycloak #${PG_DB}
+              value: ${PG_DB}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata #/data/pgdata
           ports:

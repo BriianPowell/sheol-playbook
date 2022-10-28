@@ -3,17 +3,8 @@
   gather_facts: yes
   tags: [server, setup]
   roles:
-    - build-deps
-    - dotfiles
-
-# - name: Setup k3d
-#   hosts: master
-#   gather_facts: yes
-#   become: yes
-#   tags: [server, k3d]
-#   roles:
-#     - k3d/download
-#     - k3d/create
+    - base/build-deps
+    - base/dotfiles
 
 - name: Setup k3s
   hosts: k3s_cluster
@@ -21,29 +12,26 @@
   become: yes
   tags: [server, k3s]
   roles:
-    - k3s/prereq
-    - k3s/download
+    - base/k3s/prereq
+    - base/k3s/download
 
 - name: k3s Master Node
   hosts: sheol
   become: yes
   roles:
-    - k3s/master
+    - base/k3s/master
 
 # - name: k3s Agent Node
 #   hosts: agent
 #   become: yes
 #   roles:
-#     - k3s/node
+#     - base/k3s/node
 
-# - name: k3s traefik dashboard
-#   hosts: sheol
-#   become: yes
-#   roles:
-#     - traefik
-
-# - name: k3s keycloak
-#   hosts: sheol
-#   become: yes
-#   roles:
-#     - keycloak
+- name: Infrastructure
+  hosts: sheol
+  become: yes
+  roles:
+    - infra/traefik
+    - infra/keycloak
+    - infra/traefik-forward-auth
+    - infra/grafana

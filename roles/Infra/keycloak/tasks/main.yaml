@@ -22,7 +22,7 @@
 - name: apply Keycloak postgressql
   shell:
     cmd: cat files/keycloak-postgres.yaml | envsubst | kubectl apply -f -
-    chdir: '{{ playbook_dir }}/roles/keycloak'
+    chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   environment:
     PG_USER: '{{ keycloak.postgres.user }}'
     PG_PASS: '{{ keycloak.postgres.password }}'
@@ -33,7 +33,7 @@
 - name: apply Keycloak deployment
   shell:
     cmd: cat files/keycloak.yaml | envsubst | kubectl apply -f -
-    chdir: '{{ playbook_dir }}/roles/keycloak'
+    chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   environment:
     DOMAIN: '{{ domain_name }}'
     KC_ADMN: '{{ keycloak.service.admin }}'
@@ -47,6 +47,6 @@
 - name: apply Keycloak ingress
   shell:
     cmd: kubectl apply -f files/keycloak-ingress.yaml
-    chdir: '{{ playbook_dir }}/roles/keycloak'
+    chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   delegate_to: 127.0.0.1
   register: keycloak_serice
