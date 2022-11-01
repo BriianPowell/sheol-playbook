@@ -17,7 +17,7 @@
   shell:
     cmd: kubectl create namespace keycloak
   delegate_to: 127.0.0.1
-  register: keycloak_namespace
+  register: kubectl_keycloak_namespace
 
 - name: apply Keycloak postgressql
   shell:
@@ -28,7 +28,7 @@
     PG_PASS: '{{ keycloak.postgres.password }}'
     PG_DB: '{{ keycloak.postgres.db }}'
   delegate_to: 127.0.0.1
-  register: keycloak_postgress
+  register: kubectl_keycloak_postgress
 
 - name: apply Keycloak deployment
   shell:
@@ -42,11 +42,11 @@
     PG_PASS: '{{ keycloak.postgres.password }}'
     PG_DB: '{{ keycloak.postgres.db }}'
   delegate_to: 127.0.0.1
-  register: keycloak_serice
+  register: kubectl_keycloak_service
 
 - name: apply Keycloak ingress
   shell:
     cmd: kubectl apply -f files/keycloak-ingress.yaml
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   delegate_to: 127.0.0.1
-  register: keycloak_serice
+  register: kubectl_keycloak_ingress

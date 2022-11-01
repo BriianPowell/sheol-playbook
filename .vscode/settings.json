@@ -1,0 +1,8 @@
+{
+  "yaml.schemas": {
+    "https://json.schemastore.org/yamllint.json": [
+      "file:///Users/boog/GitHub/sheol-playbook/roles/infra/prometheus/files/prometheus.yml",
+      "file:///Users/boog/GitHub/sheol-playbook/roles/infra/prometheus/files/prometheus.yaml"
+    ]
+  }
+}

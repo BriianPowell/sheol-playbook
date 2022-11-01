@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus-dashboard-https
+  namespace: prometheus
+  labels:
+    app: prometheus
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`prometheus.powell.place`)
+      kind: Rule
+      services:
+        - name: prometheus
+          port: 8080

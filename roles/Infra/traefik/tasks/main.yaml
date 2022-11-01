@@ -17,37 +17,25 @@
   shell:
     cmd: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.yaml
   delegate_to: 127.0.0.1
-  register: kubectl_cert
+  register: kubectl_traefik_cert_manager
   when: kubectl_namespaces.stdout.find('cert-manager') == -1
-
-# - name: Print kubectl apply output
-#   debug:
-#     var: kubectl_cert.stdout
 
 - name: create LetsEncrypt ClusterIssuer
   shell:
     cmd: cat files/lets-encrypt.yaml | envsubst | kubectl apply -f -
-    chdir: '{{ playbook_dir }}/roles/traefik'
+    chdir: '{{ playbook_dir }}/roles/infra/traefik'
   environment:
     EMAIL: '{{ email.server_owner }'
     API_TOKEN: '{{ cloudflare.api_token_base64 }}'
   delegate_to: 127.0.0.1
-  register: kubectl_letsencrypt
-
-- name: Print kubectl apply output
-  debug:
-    var: kubectl_letsencrypt.stdout
+  register: kubectl_traefik_letsencrypt
 
 - name: request wilcard cert
   shell:
     cmd: kubectl apply -f files/wildcard-cert.yaml
-    chdir: '{{ playbook_dir }}/roles/traefik'
+    chdir: '{{ playbook_dir }}/roles/infra/traefik'
   delegate_to: 127.0.0.1
-  register: kubectl_wildcard
-
-- name: Print kubectl apply output
-  debug:
-    var: kubectl_wildcard.stdout
+  register: kubectl_traefik_wildcard
 
 - name: copy traefik config file to manifests
   become: true
@@ -58,24 +46,16 @@
     group: root
     mode: '0600'
 
-- name: expose traefik
+- name: expose Traefik dashboard
   shell:
     cmd: kubectl apply -f files/traefik-ingress.yaml
-    chdir: '{{ playbook_dir }}/roles/traefik'
+    chdir: '{{ playbook_dir }}/roles/infra/traefik'
   delegate_to: 127.0.0.1
   register: kubectl_traefik_dashboard
 
-- name: Print kubectl apply output
-  debug:
-    var: kubectl_traefik_dashboard.stdout
-
-- name: force Https
+- name: force Https ingress
   shell:
     cmd: kubectl apply -f files/traefik-tls.yaml
-    chdir: '{{ playbook_dir }}/roles/traefik'
+    chdir: '{{ playbook_dir }}/roles/infra/traefik'
   delegate_to: 127.0.0.1
-  register: kubectl_traefik_http
-
-- name: Print kubectl apply output
-  debug:
-    var: kubectl_traefik_http.stdout
+  register: kubectl_traefik_https

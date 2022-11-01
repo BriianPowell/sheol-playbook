@@ -21,7 +21,7 @@
     DOMAIN: '{{ domain_name }}'
     DISC_URL: '{{ keycloak.traefik-forward-auth.discovery_url }'
   delegate_to: 127.0.0.1
-  register: forward_auth_configmap
+  register: kubectl_forward_auth_configmap
 
 - name: apply forward-auth secret
   shell:
@@ -32,21 +32,21 @@
     CLIENT_SECRET: '{{ keycloak.traefik-forward-auth.client_secret_base_64 }}'
     SECRET: '{{ keycloak.traefik-forward-auth.auth_secrety_base64 }}'
   delegate_to: 127.0.0.1
-  register: forward_auth_secret
+  register: kubectl_forward_auth_secret
 
 - name: apply forward-auth deployment
   shell:
     cmd: kubectl apply -f files/forward-auth.yaml
     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
   delegate_to: 127.0.0.1
-  register: keycloak_postgress
+  register: kubectl_forward_auth_deployment
 
 - name: apply forward-auth ingress and middleware
   shell:
     cmd: kubectl apply -f files/forward-auth-middleware.yaml
     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
   delegate_to: 127.0.0.1
-  register: keycloak_serice
+  register: kubectl_forward_auth_ingress
 
 # - name: kustomize example
 #   shell:

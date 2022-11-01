@@ -1,0 +1,48 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: check if grafana exists
+  shell:
+    cmd: kubectl get service --all-namespaces
+  delegate_to: 127.0.0.1
+  register: kubectl_namespaces
+
+# - name: Print kubectl get service --all-namespaces
+#   debug:
+#     var: kubectl_namespaces.stdout
+
+- name: create Grafana namespace
+  shell:
+    cmd: kubectl create namespace grafana
+  delegate_to: 127.0.0.1
+  register: kubectl_grafana_namespace
+
+- name: create Grafana configmap
+  shell:
+    cmd: cat files/grafana-config.ini | envsubst | kubectl create configmap -n grafana grafana-config --from-file= -
+    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+  environment:
+    API_URL: '{{ grafana.api_url }}'
+    AUTH_URL: '{{ grafana.auth_url }}'
+    TOKEN_URL: '{{ grafana.token_url }}'
+    CLIENT_ID: '{{ grafana.client_id }}'
+    CLIENT_SECRET: '{{ grafana.client_secret }}'
+    ROOT_URL: '{{ grafana.root_url }}'
+  delegate_to: 127.0.0.1
+  register: kubectl_grafana_configmap
+
+- name: Apply Grafana Deployment
+  shell:
+    cmd: kubectl apply -f files/grafana.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+  delegate_to: 127.0.0.1
+  register: kubectl_grafana_deployment
+
+- name: Apply Grafana ingress
+  shell:
+    cmd: kubectl apply -f files/grafana-ingress.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+  delegate_to: 127.0.0.1
+  register: kubectl_grafana_dashboard
