@@ -28,8 +28,8 @@
     cmd: cat files/forward-auth-secret.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
   environment:
-    CLIENT_ID: '{{ keycloak.traefik-forward-auth.client_id_base_64 }}'
-    CLIENT_SECRET: '{{ keycloak.traefik-forward-auth.client_secret_base_64 }}'
+    CLIENT_ID: '{{ keycloak.traefik-forward-auth.client_id_64 }}'
+    CLIENT_SECRET: '{{ keycloak.traefik-forward-auth.client_secret_64 }}'
     SECRET: '{{ keycloak.traefik-forward-auth.auth_secrety_base64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_forward_auth_secret
@@ -47,7 +47,6 @@
     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
   delegate_to: 127.0.0.1
   register: kubectl_forward_auth_ingress
-
 # - name: kustomize example
 #   shell:
 #     cmd: kubectl apply -k files

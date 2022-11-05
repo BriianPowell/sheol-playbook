@@ -2,5 +2,5 @@
 arrowParens: avoid
 bracketSpacing: true
 trailingComma: all
-semi: true
+semi: false
 singleQuote: true

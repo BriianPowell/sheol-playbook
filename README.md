@@ -80,9 +80,9 @@ brew install helm
 
 - [x] Traefik Dashboard
 - [x] [Keycloak][https://github.com/keycloak/keycloak]
-- [x] Keycloak Forward Auth
+- [x] [Traefik Forward Auth][https://github.com/thomseddon/traefik-forward-auth]
 - [ ] [Grafana][https://github.com/grafana/grafana]
-- [ ] Prometheus
+- [ ] [Prometheus][https://prometheus.io/]
 - [ ] [Scrutiny][https://github.com/AnalogJ/scrutiny]
 - [ ] [Gotify][https://github.com/gotify/server]
 - [ ] [Nextcloud][https://github.com/nextcloud/server]

@@ -26,7 +26,7 @@
     chdir: '{{ playbook_dir }}/roles/infra/traefik'
   environment:
     EMAIL: '{{ email.server_owner }'
-    API_TOKEN: '{{ cloudflare.api_token_base64 }}'
+    API_TOKEN: '{{ cloudflare.api_token_64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_traefik_letsencrypt
 

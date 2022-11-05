@@ -2,8 +2,6 @@
 # between different editors and IDEs
 # editorconfig.org
 
-root = true
-
 [*]
 indent_style = space
 indent_size = 2
