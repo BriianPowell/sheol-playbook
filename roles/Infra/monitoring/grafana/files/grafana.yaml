@@ -2,9 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana
-  namespace: grafana
+  namespace: monitoring
   labels:
     app: grafana
+  # annotations:
+  #   prometheus.io/scrape: 'true'
+  #   prometheus.io/path: '/actuator/prometheus'
+  #   prometheus.io/port: 8080
 spec:
   ports:
     - port: 3000
@@ -19,7 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: grafana
+  namespace: monitoring
   labels:
     app: grafana
 spec:
@@ -82,14 +86,15 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-pvc
-  namespace: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-
 #
 # References:
 # https://medium.com/@charled.breteche/securing-grafana-with-keycloak-sso-d01fec05d984

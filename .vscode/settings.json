@@ -2,7 +2,8 @@
   "yaml.schemas": {
     "https://json.schemastore.org/yamllint.json": [
       "file:///Users/boog/GitHub/sheol-playbook/roles/infra/prometheus/files/prometheus.yml",
-      "file:///Users/boog/GitHub/sheol-playbook/roles/infra/prometheus/files/prometheus.yaml"
+      "file:///Users/boog/GitHub/sheol-playbook/roles/infra/prometheus/files/prometheus.yaml",
+      "file:///Users/boog/GitHub/sheol-playbook/roles/infra/monitoring/prometheus/files/prometheus.yaml"
     ]
   }
 }

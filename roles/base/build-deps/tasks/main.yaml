@@ -61,7 +61,6 @@
     groups: 'docker'
   notify:
     - 'Kill own ssh connections'
-
-- name: Setup node_exporter
-  include_role:
-    name: 'cloudalchemy.node_exporter'
+# - name: Setup node_exporter
+#   include_role:
+#     name: 'cloudalchemy.node_exporter'

@@ -21,8 +21,8 @@
 
 - name: create Grafana configmap
   shell:
-    cmd: cat files/grafana-config.ini | envsubst | kubectl create configmap -n grafana grafana-config --from-file= -
-    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+    cmd: cat files/grafana-config.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
   environment:
     API_URL: '{{ grafana.api_url }}'
     AUTH_URL: '{{ grafana.auth_url }}'
@@ -36,13 +36,13 @@
 - name: Apply Grafana Deployment
   shell:
     cmd: kubectl apply -f files/grafana.yaml
-    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
   delegate_to: 127.0.0.1
   register: kubectl_grafana_deployment
 
 - name: Apply Grafana ingress
   shell:
     cmd: kubectl apply -f files/grafana-ingress.yaml
-    chdir: '{{ playbook_dir }}/roles/infra/grafana'
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
   delegate_to: 127.0.0.1
   register: kubectl_grafana_dashboard

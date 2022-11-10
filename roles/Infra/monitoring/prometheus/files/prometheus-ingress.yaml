@@ -2,7 +2,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: prometheus-dashboard-https
-  namespace: prometheus
+  namespace: monitoring
   labels:
     app: prometheus
 spec:
@@ -14,3 +14,6 @@ spec:
       services:
         - name: prometheus
           port: 8080
+      middlewares:
+        - name: traefik-forward-auth
+          namespace: kube-system
