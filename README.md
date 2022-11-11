@@ -79,16 +79,16 @@ brew install helm
 - [x] Traefik Dashboard
 - [x] [Kubed](https://appscode.com/products/kubed/v0.12.0/welcome/)
 - [x] [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller)
-- [x] [Keycloak][https://github.com/keycloak/keycloak]
-- [x] [Traefik Forward Auth][https://github.com/thomseddon/traefik-forward-auth]
-- [x] [Grafana][https://github.com/grafana/grafana]
-- [x] [Prometheus][https://prometheus.io/]
+- [x] [Keycloak](https://github.com/keycloak/keycloak)
+- [x] [Traefik Forward Auth](https://github.com/thomseddon/traefik-forward-auth)
+- [x] [Grafana](https://github.com/grafana/grafana)
+- [x] [Prometheus](https://prometheus.io/)
 - [ ] [Alert Manager](https://github.com/prometheus/alertmanager)
 - [x] [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
-- [ ] [Scrutiny][https://github.com/AnalogJ/scrutiny] - **find alternative** as this is not compatible with k8s
-- [ ] [Gotify][https://github.com/gotify/server] - **find alternative** as is not possible with iOS
-- [ ] [Nextcloud][https://github.com/nextcloud/server]
-- [ ] [HomeAssistant][https://www.home-assistant.io/]
+- [ ] [Scrutiny](https://github.com/AnalogJ/scrutiny) - **find alternative** as this is not compatible with k8s
+- [ ] [Gotify](https://github.com/gotify/server) - **find alternative** as is not possible with iOS
+- [ ] [Nextcloud](https://github.com/nextcloud/server)
+- [ ] [HomeAssistant](https://www.home-assistant.io/)
 
 ## Gotchyas
 
