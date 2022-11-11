@@ -1,0 +1,32 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: Apply Alert Manager Config
+  shell:
+    cmd: kubectl apply -f files/alert-manager-config.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/alert-manager'
+  delegate_to: 127.0.0.1
+  register: kubectl_prometheus_cluster_role
+
+- name: Apply Alert Manager Template
+  shell:
+    cmd: kubectl apply -f files/alert-manager-template.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/alert-manager'
+  delegate_to: 127.0.0.1
+  register: kubectl_prometheus_config
+
+- name: Apply Alert Manager Deployment
+  shell:
+    cmd: kubectl apply -f files/alert-manager.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/alert-manager'
+  delegate_to: 127.0.0.1
+  register: kubectl_prometheus
+
+- name: Apply Prometheus Ingress
+  shell:
+    cmd: kubectl apply -f files/alert-manager-ingress.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/alert-manager'
+  delegate_to: 127.0.0.1
+  register: kubectl_prometheus_ingress

@@ -9,10 +9,9 @@ commonLabels:
   app: traefik-forward-auth
 
 resources:
-- forward-auth-secret.yaml
-- forward-auth.yaml
-- forward-auth-middleware.yaml
-
+  - forward-auth-secret.yaml
+  - forward-auth.yaml
+  - forward-auth-middleware.yaml
 #
 # Configs
 #

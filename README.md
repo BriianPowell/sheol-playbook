@@ -1,23 +1,23 @@
-# Sheol Ansible Playbook
+# Sheol Playbook
 
 Ansible playbook for the Sheol server. This playbook creates a [k3s.io](https://k3s.io/) cluster and deploys services to it.
 
-## Install Requirements
+## Requirements
 
 ```bash
 ansible-galaxy install -r requirements.yaml
 ```
 
-## Add Hosts
+## Hosts
 
-**Make sure to add IP to hosts file:**
+**Make sure to add target node IP to hosts file:**
 
 ```ini
 [sheol]
 (Destination IP)
 ```
 
-## Useful Scripts
+## Scripting
 
 ### Ansible
 
@@ -40,11 +40,11 @@ nix-env -iA nixpkgs.kubectl
 
 **Bash**
 
-```
+```bash
 brew install kubectl
 ```
 
-**Should be run from local machine**
+**Copy kube-config from master to local:**
 
 ```bash
 scp boog@10.0.0.10:~/.kube/config ~/.kube/config
@@ -70,28 +70,25 @@ nix-shell -p kubernetes-helm-wrapped
 
 **Bash**
 
-```
+```bash
 brew install helm
 ```
 
-
-
-## TODO
+## Infrastructure
 
 - [x] Traefik Dashboard
+- [x] [Kubed](https://appscode.com/products/kubed/v0.12.0/welcome/)
+- [x] [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller)
 - [x] [Keycloak][https://github.com/keycloak/keycloak]
 - [x] [Traefik Forward Auth][https://github.com/thomseddon/traefik-forward-auth]
-- [ ] [Grafana][https://github.com/grafana/grafana]
-- [ ] [Prometheus][https://prometheus.io/]
-- [ ] [Scrutiny][https://github.com/AnalogJ/scrutiny]
-- [ ] [Gotify][https://github.com/gotify/server]
+- [x] [Grafana][https://github.com/grafana/grafana]
+- [x] [Prometheus][https://prometheus.io/]
+- [ ] [Alert Manager](https://github.com/prometheus/alertmanager)
+- [x] [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
+- [ ] [Scrutiny][https://github.com/AnalogJ/scrutiny] - **find alternative** as this is not compatible with k8s
+- [ ] [Gotify][https://github.com/gotify/server] - **find alternative** as is not possible with iOS
 - [ ] [Nextcloud][https://github.com/nextcloud/server]
 - [ ] [HomeAssistant][https://www.home-assistant.io/]
-
-## References
-
-- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-- <https://github.com/cert-manager/cert-manager>
 
 ## Gotchyas
 
@@ -102,7 +99,10 @@ set -Ux DISABLE_SPRING true
 set -Ux OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
 ```
 
-## Keeping in Mind
+## Helpful References
 
 * https://stackoverflow.com/questions/60528376/traefik-redirect-from-one-host-to-another
 * https://community.traefik.io/t/cant-route-to-other-ip-port-on-subnet/11152/2
+
+- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+- <https://github.com/cert-manager/cert-manager>

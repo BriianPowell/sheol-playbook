@@ -3,21 +3,15 @@
   tags: [common, secrets]
   include_vars: '{{ playbook_dir }}/secrets.env.yaml'
 
-- name: check if grafana exists
-  shell:
-    cmd: kubectl get service --all-namespaces
-  delegate_to: 127.0.0.1
-  register: kubectl_namespaces
+# - name: check if grafana exists
+#   shell:
+#     cmd: kubectl get service --all-namespaces
+#   delegate_to: 127.0.0.1
+#   register: kubectl_namespaces
 
 # - name: Print kubectl get service --all-namespaces
 #   debug:
 #     var: kubectl_namespaces.stdout
-
-- name: create Grafana namespace
-  shell:
-    cmd: kubectl create namespace grafana
-  delegate_to: 127.0.0.1
-  register: kubectl_grafana_namespace
 
 - name: create Grafana configmap
   shell:

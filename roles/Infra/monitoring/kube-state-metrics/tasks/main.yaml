@@ -1,0 +1,11 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: Apply Kube States Metrics Kustomization
+  shell:
+    cmd: kubectl apply -k files/
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/kube-state-metrics'
+  delegate_to: 127.0.0.1
+  register: kubectl_prometheus_cluster_role
