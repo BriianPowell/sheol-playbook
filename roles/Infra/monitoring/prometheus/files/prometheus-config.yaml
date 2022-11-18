@@ -1,5 +1,6 @@
-# Guide
+# Docs
 # https://www.opsramp.com/guides/prometheus-monitoring/prometheus-alerting/
+# https://prometheus.io/docs/introduction/overview/
 #
 apiVersion: v1
 kind: ConfigMap

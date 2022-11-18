@@ -1,0 +1,11 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: apply node_exporter daemonset and service
+  shell:
+    cmd: kubectl apply -f files/node-exporter.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/node-exporter'
+  delegate_to: 127.0.0.1
+  register: kubectl_node_exporter

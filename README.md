@@ -83,8 +83,9 @@ brew install helm
 - [x] [Traefik Forward Auth](https://github.com/thomseddon/traefik-forward-auth)
 - [x] [Grafana](https://github.com/grafana/grafana)
 - [x] [Prometheus](https://prometheus.io/)
-- [ ] [Alert Manager](https://github.com/prometheus/alertmanager)
+- [x] [alertmanager](https://github.com/prometheus/alertmanager)
 - [x] [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
+- [ ] [node_exporter](https://github.com/prometheus/node_exporter)
 - [ ] [Scrutiny](https://github.com/AnalogJ/scrutiny) - **find alternative** as this is not compatible with k8s
 - [ ] [Gotify](https://github.com/gotify/server) - **find alternative** as is not possible with iOS
 - [ ] [Nextcloud](https://github.com/nextcloud/server)
@@ -106,3 +107,4 @@ set -Ux OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
 
 - https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 - <https://github.com/cert-manager/cert-manager>
+- https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/
