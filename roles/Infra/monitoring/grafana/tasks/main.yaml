@@ -13,7 +13,7 @@
 #   debug:
 #     var: kubectl_namespaces.stdout
 
-- name: create Grafana configmap
+- name: create Grafana config
   shell:
     cmd: cat files/grafana-config.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
@@ -27,14 +27,21 @@
   delegate_to: 127.0.0.1
   register: kubectl_grafana_configmap
 
-- name: Apply Grafana Deployment
+- name: apply Grafana data sources
+  shell:
+    cmd: kubectl apply -f files/grafana-data-sources.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
+  delegate_to: 127.0.0.1
+  register: kubectl_grafana_data_sources
+
+- name: apply Grafana deployment
   shell:
     cmd: kubectl apply -f files/grafana.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
   delegate_to: 127.0.0.1
   register: kubectl_grafana_deployment
 
-- name: Apply Grafana ingress
+- name: apply Grafana ingress
   shell:
     cmd: kubectl apply -f files/grafana-ingress.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'

@@ -9,28 +9,28 @@
   delegate_to: 127.0.0.1
   register: kubectl_grafana_namespace
 
-- name: Apply Prometheus Cluster Role
+- name: apply Prometheus cluster role
   shell:
     cmd: kubectl apply -f files/prometheus-cluster-role.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/prometheus'
   delegate_to: 127.0.0.1
   register: kubectl_prometheus_cluster_role
 
-- name: Apply Prometheus Cluster Role
+- name: apply Prometheus config
   shell:
     cmd: kubectl apply -f files/prometheus-config.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/prometheus'
   delegate_to: 127.0.0.1
   register: kubectl_prometheus_config
 
-- name: Apply Prometheus Deployment
+- name: apply Prometheus deployment
   shell:
     cmd: kubectl apply -f files/prometheus.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/prometheus'
   delegate_to: 127.0.0.1
   register: kubectl_prometheus
 
-- name: Apply Prometheus Ingress
+- name: apply Prometheus ingress
   shell:
     cmd: kubectl apply -f files/prometheus-ingress.yaml
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/prometheus'

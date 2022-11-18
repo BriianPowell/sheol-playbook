@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: keycloak-headless
   namespace: keycloak
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '8080'
   labels:
     app: keycloak
 spec:
@@ -30,10 +33,10 @@ metadata:
     app: keycloak
 spec:
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-    path:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      path:
   selector:
     app: keycloak
 ---
@@ -55,44 +58,43 @@ spec:
         app: keycloak
     spec:
       containers:
-      - name: keycloak
-        image: quay.io/keycloak/keycloak:19.0.1
-        args: ["start"]
-        env:
-        - name: KEYCLOAK_ADMIN
-          value: ${KC_ADMN}
-        - name: KEYCLOAK_ADMIN_PASSWORD
-          value: ${KC_PASS}
-        - name: KC_PROXY
-          value: edge
-        - name: KC_HOSTNAME
-          value: keycloak.${DOMAIN}
-        - name: KC_HEALTH_ENABLED
-          value: 'true'
-        - name: KC_METRICS_ENABLED
-          value: 'true'
-        - name: KC_SPI_ADMIN_REALM
-          value: inferno
-        - name: KC_DB
-          value: postgres
-        - name: KC_DB_URL_HOST
-          value: keycloak-postgres-db
-        - name: KC_DB_URL_DATABASE
-          value: ${PG_DB}
-        - name: KC_DB_URL_PORT
-          value: '5432'
-        - name: KC_DB_USERNAME
-          value: ${PG_USER}
-        - name: KC_DB_PASSWORD
-          value: ${PG_PASS}
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          initialDelaySeconds: 30
-          timeoutSeconds: 30
-          httpGet:
-            path: /realms/inferno
-            port: 8080
-
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:19.0.1
+          args: ['start']
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: ${KC_ADMN}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: ${KC_PASS}
+            - name: KC_PROXY
+              value: edge
+            - name: KC_HOSTNAME
+              value: keycloak.${DOMAIN}
+            - name: KC_HEALTH_ENABLED
+              value: 'true'
+            - name: KC_METRICS_ENABLED
+              value: 'true'
+            - name: KC_SPI_ADMIN_REALM
+              value: inferno
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL_HOST
+              value: keycloak-postgres-db
+            - name: KC_DB_URL_DATABASE
+              value: ${PG_DB}
+            - name: KC_DB_URL_PORT
+              value: '5432'
+            - name: KC_DB_USERNAME
+              value: ${PG_USER}
+            - name: KC_DB_PASSWORD
+              value: ${PG_PASS}
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            httpGet:
+              path: /realms/inferno
+              port: 8080
 # Reference: https://github.com/keycloak/keycloak/discussions/12594

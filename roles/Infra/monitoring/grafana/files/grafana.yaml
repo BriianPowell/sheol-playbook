@@ -5,19 +5,18 @@ metadata:
   namespace: monitoring
   labels:
     app: grafana
-  # annotations:
-  #   prometheus.io/scrape: 'true'
-  #   prometheus.io/path: '/actuator/prometheus'
-  #   prometheus.io/port: 8080
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '3000'
 spec:
+  selector:
+    app: grafana
+  type: LoadBalancer
+  sessionAffinity: None
   ports:
     - port: 3000
       protocol: TCP
       targetPort: http-grafana
-  selector:
-    app: grafana
-  sessionAffinity: None
-  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -66,6 +65,9 @@ spec:
               port: 3000
             timeoutSeconds: 1
           resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
             requests:
               cpu: 250m
               memory: 750Mi
@@ -74,6 +76,9 @@ spec:
               name: grafana-pv
             - mountPath: /etc/grafana
               name: g-config
+            - mountPath: /etc/grafana/provisioning/datasources
+              name: grafana-datasources
+              readOnly: false
       volumes:
         - name: grafana-pv
           persistentVolumeClaim:
@@ -81,6 +86,10 @@ spec:
         - name: g-config
           configMap:
             name: grafana-config
+        - name: grafana-datasources
+          configMap:
+            defaultMode: 420
+            name: grafana-datasources
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

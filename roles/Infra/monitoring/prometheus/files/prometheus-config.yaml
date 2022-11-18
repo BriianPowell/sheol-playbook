@@ -1,9 +1,13 @@
+# Guide
+# https://www.opsramp.com/guides/prometheus-monitoring/prometheus-alerting/
+#
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-server-conf
   labels:
     name: prometheus-server-conf
+    app: prometheus
   namespace: monitoring
 data:
   prometheus.rules: |-
@@ -11,7 +15,7 @@ data:
     - name: High Pod Memory Alert
       rules:
       - alert: High Pod Memory
-        expr: sum(container_memory_usage_bytes) > 1
+        expr: sum(container_memory_working_set_bytes{image!="",container!="POD", namespace!="kube-system"}) by (namespace,container,pod) > 1000000000
         for: 1m
         labels:
           severity: critical

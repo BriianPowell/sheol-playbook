@@ -1,10 +1,10 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: prometheus-dashboard-https
+  name: alertmanager-dashboard-https
   namespace: monitoring
   labels:
-    app: prometheus
+    app: alertmanager
 spec:
   entryPoints:
     - websecure
