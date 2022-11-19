@@ -37,6 +37,7 @@ spec:
           args:
             - '--config.file=/etc/alertmanager/config.yml'
             - '--storage.path=/alertmanager'
+            - '--web.external-url=http://alertmanager.powell.place'
           ports:
             - name: alertmanager
               containerPort: 9093

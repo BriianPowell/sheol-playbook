@@ -1,6 +1,7 @@
 # Docs
 # https://www.opsramp.com/guides/prometheus-monitoring/prometheus-alerting/
 # https://prometheus.io/docs/introduction/overview/
+# https://github.com/prometheus/prometheus/blob/main/documentation/examples/prometheus-kubernetes.yml
 #
 apiVersion: v1
 kind: ConfigMap
@@ -13,60 +14,61 @@ metadata:
 data:
   prometheus.rules: |-
     groups:
-    - name: High Pod Memory Alert
+    - name: Deployment groups
       rules:
-      - alert: High Pod Memory
-        expr: sum(container_memory_working_set_bytes{image!="",container!="POD", namespace!="kube-system"}) by (namespace,container,pod) > 1000000000
+      - alert: Deployment at 0 Replicas
+        expr: sum(kube_deployment_status_replicas{pod_template_hash=""}) by (deployment,namespace)  < 1
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: High Memory Usage
-      - alert: KubeStateMetricsListErrors
-        annotations:
-          description: kube-state-metrics is experiencing errors at an elevated rate in list operations. This is likely causing it to not be able to expose metrics about Kubernetes objects correctly or at all.
-          summary: kube-state-metrics is experiencing errors in list operations.
-        expr: |
-          (sum(rate(kube_state_metrics_list_total{job="kube-state-metrics",result="error"}[5m]))
-            /
-          sum(rate(kube_state_metrics_list_total{job="kube-state-metrics"}[5m])))
-          > 0.01
-        for: 15m
-        labels:
-          severity: critical
-      - alert: KubeStateMetricsWatchErrors
-        annotations:
-          description: kube-state-metrics is experiencing errors at an elevated rate in watch operations. This is likely causing it to not be able to expose metrics about Kubernetes objects correctly or at all.
-          summary: kube-state-metrics is experiencing errors in watch operations.
-        expr: |
-          (sum(rate(kube_state_metrics_watch_total{job="kube-state-metrics",result="error"}[5m]))
-            /
-          sum(rate(kube_state_metrics_watch_total{job="kube-state-metrics"}[5m])))
-          > 0.01
-        for: 15m
-        labels:
-          severity: critical
-      - alert: KubeStateMetricsShardingMismatch
-        annotations:
-          description: kube-state-metrics pods are running with different --total-shards configuration, some Kubernetes objects may be exposed multiple times or not exposed at all.
-          summary: kube-state-metrics sharding is misconfigured.
-        expr: |
-          stdvar (kube_state_metrics_total_shards{job="kube-state-metrics"}) != 0
-        for: 15m
-        labels:
-          severity: critical
-      - alert: KubeStateMetricsShardsMissing
-        annotations:
-          description: kube-state-metrics shards are missing, some Kubernetes objects are not being exposed.
-          summary: kube-state-metrics shards are missing.
-        expr: |
-          2^max(kube_state_metrics_total_shards{job="kube-state-metrics"}) - 1
-            -
-          sum( 2 ^ max by (shard_ordinal) (kube_state_metrics_shard_ordinal{job="kube-state-metrics"}) )
-          != 0
-        for: 15m
-        labels:
-          severity: critical
+          summary: Deployment {{$labels.deployment}} is currently having no pods running
+    - name: Pods
+      rules:
+        - alert: High Pod Memory
+          expr: sum(container_memory_working_set_bytes{image!="",container!="POD", namespace!="kube-system"}) by (namespace,container,pod) > 1200000000
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: Pod {{$labels.pod}} is currently utilizing high memory (> 1.2GB)
+        - alert: Container Restarted
+          expr: sum(increase(kube_pod_container_status_restarts_total{namespace!="kube-system",pod_template_hash=""}[1m])) by (pod,namespace,container) > 0
+          for: 0m
+          labels:
+            severity: warn
+          annotations:
+            summary: Container {{$labels.container}} in {{$labels.pod}} in {{$labels.namespace}} was restarted
+        - alert: Too Many Container Restarts
+          expr: sum(increase(kube_pod_container_status_restarts_total{namespace!="kube-system",pod_template_hash=""}[15m])) by (pod,namespace,container) > 5
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: Container named {{$labels.container}} in {{$labels.pod}} in {{$labels.namespace}} was restarted
+    - name: Node
+      rules:
+        - alert: High Node Memory Usage
+          expr: (sum (container_memory_working_set_bytes{id="/",container!="POD"}) by (kubernetes_io_hostname) / sum (machine_memory_bytes{}) by (kubernetes_io_hostname) * 100) > 80
+          for: 5m
+          labels:
+            severity: warn
+          annotations:
+            summary: Node {{$labels.kubernetes_io_hostname}} has more than 80% memory used
+        - alert: High Node CPU Usage
+          expr: (sum(rate(container_cpu_usage_seconds_total{id="/",container!="POD"}[1m])) by (kubernetes_io_hostname) / sum(machine_cpu_cores) by (kubernetes_io_hostname)  * 100) > 80
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Node {{$labels.kubernetes_io_hostname}} has more than 80% allocatable cpu used
+        - alert: High Node Disk Usage
+          expr: (sum(container_fs_usage_bytes{id="/",container!="POD"}) by (kubernetes_io_hostname) / sum(container_fs_limit_bytes{container!="POD",id="/"}) by (kubernetes_io_hostname)) * 100 > 85
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Node {{$labels.kubernetes_io_hostname}} has more than 85% disk used
   prometheus.yml: |-
     global:
       scrape_interval: 15s

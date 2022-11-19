@@ -40,6 +40,8 @@ spec:
           args:
             - '--config.file=/etc/prometheus/prometheus.yml'
             - '--storage.tsdb.path=/prometheus/'
+            - '--web.external-url=http://prometheus.powell.place'
+            - '--web.route-prefix=/'
           ports:
             - containerPort: 9090
           volumeMounts:

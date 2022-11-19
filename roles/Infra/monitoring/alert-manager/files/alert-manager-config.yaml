@@ -29,7 +29,7 @@ data:
     receivers:
     - name: alert-emailer
       email_configs:
-      - to: brian@${DOMAIN}
+      - to: brian@{DOMAIN}
         send_resolved: true
     # - name: slack_demo
     #   slack_configs:
