@@ -50,14 +50,6 @@ brew install kubectl
 scp boog@10.0.0.10:~/.kube/config ~/.kube/config
 ```
 
-```bash
-kubectl get nodes # get k3s instances
-kubectl get svc --all-namespaces # get all running services
-kubectl get pods --all-namespaces # get all running pods
-kubectl get endpoints --all-namespaces # get all endpoints
-kubectl rollout restart deployment traefik -n kube-system # restart a pod
-```
-
 ### Helm
 
 Install Helm with your preferred method:
@@ -86,10 +78,10 @@ brew install helm
 - [x] [alertmanager](https://github.com/prometheus/alertmanager)
 - [x] [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
 - [x] [node_exporter](https://github.com/prometheus/node_exporter)
+- [ ] [HomeAssistant](https://www.home-assistant.io/)
+- [ ] [Nextcloud](https://github.com/nextcloud/server)
 - [ ] [Scrutiny](https://github.com/AnalogJ/scrutiny) - **find alternative** as this is not compatible with k8s
 - [ ] [Gotify](https://github.com/gotify/server) - **find alternative** as is not possible with iOS
-- [ ] [Nextcloud](https://github.com/nextcloud/server)
-- [ ] [HomeAssistant](https://www.home-assistant.io/)
 
 ## Gotchyas
 

@@ -7,7 +7,7 @@
   shell:
     cmd: kubectl create namespace monitoring
   delegate_to: 127.0.0.1
-  register: kubectl_grafana_namespace
+  register: kubectl_monitoring_namespace
 
 - name: apply Prometheus cluster role
   shell:

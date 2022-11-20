@@ -2,9 +2,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-config
+  namespace: monitoring
   labels:
     name: grafana-config
-  namespace: monitoring
 data:
   grafana.ini: |-
     [auth]

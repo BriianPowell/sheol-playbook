@@ -3,15 +3,14 @@ kind: Service
 metadata:
   name: keycloak-headless
   namespace: keycloak
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '8080'
   labels:
     app: keycloak
 spec:
-  clusterIP: None
   selector:
     app: keycloak
+  clusterIP: None
+  sessionAffinity: None
+  type: ClusterIP
   ports:
     - name: http
       port: 8080
@@ -21,8 +20,6 @@ spec:
       port: 7600
       protocol: TCP
       targetPort: jgroups
-  sessionAffinity: None
-  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
@@ -31,14 +28,16 @@ metadata:
   namespace: keycloak
   labels:
     app: keycloak
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '8080'
 spec:
+  selector:
+    app: keycloak
   ports:
     - name: http
       port: 8080
       targetPort: 8080
-      path:
-  selector:
-    app: keycloak
 ---
 apiVersion: apps/v1
 kind: Deployment

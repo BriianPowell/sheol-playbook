@@ -1,9 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   name: alertmanager-templates
   namespace: monitoring
+  labels:
+    app: alertmanager
+  creationTimestamp: null
 data:
   default.tmpl: |
     {{ define "__alertmanager" }}AlertManager{{ end }}

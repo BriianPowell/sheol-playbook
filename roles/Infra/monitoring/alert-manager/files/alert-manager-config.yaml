@@ -3,6 +3,8 @@ apiVersion: v1
 metadata:
   name: alertmanager-config
   namespace: monitoring
+  labels:
+    app: alertmanager
 data:
   config.yml: |-
     global:

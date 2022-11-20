@@ -26,6 +26,7 @@ metadata:
   labels:
     app: grafana
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: grafana
@@ -43,9 +44,9 @@ spec:
           image: grafana/grafana:9.2.2
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3000
-              name: http-grafana
+            - name: http-grafana
               protocol: TCP
+              containerPort: 3000
           readinessProbe:
             failureThreshold: 3
             httpGet:

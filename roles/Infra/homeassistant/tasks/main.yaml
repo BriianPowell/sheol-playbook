@@ -1,0 +1,24 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: create homeassistant namespace
+  shell:
+    cmd: kubectl create namespace homeassistant
+  delegate_to: 127.0.0.1
+  register: kubectl_homeassistant_namespace
+
+- name: apply Home Assistant deployment
+  shell:
+    cmd: kubectl apply -f files/homeassistant.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/homeassistant'
+  delegate_to: 127.0.0.1
+  register: kubectl_homeassistant_deployment
+
+- name: apply Home Assistant ingress
+  shell:
+    cmd: kubectl apply -f files/homeassistant-ingress.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/homeassistant'
+  delegate_to: 127.0.0.1
+  register: kubectl_homeassistant_ingress
