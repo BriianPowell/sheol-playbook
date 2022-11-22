@@ -34,4 +34,13 @@
     - infra/traefik
     - infra/keycloak
     - infra/traefik-forward-auth
-    - infra/grafana
+
+- name: Monitoring
+  hosts: sheol
+  become: yes
+  roles:
+    - infra/monitoring/prometheus
+    - infra/monitoring/node-exporter
+    - infra/monitoring/kube-state-metrics
+    - infra/monitoring/alert-manager
+    - infra/monitoring/grafana

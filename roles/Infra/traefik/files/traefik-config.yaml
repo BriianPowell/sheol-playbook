@@ -6,6 +6,8 @@ metadata:
 spec:
   valuesContent: |-
     additionalArguments:
+      - "--entryPoints.web.proxyProtocol.insecure"
+      - "--entryPoints.web.forwardedHeaders.insecure"
       - "--providers.kubernetescrd.allowCrossNamespace=true"
       - "--log.level=INFO"
     dashboard:

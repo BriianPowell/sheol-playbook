@@ -11,8 +11,6 @@ metadata:
 spec:
   selector:
     app: grafana
-  type: LoadBalancer
-  sessionAffinity: None
   ports:
     - port: 3000
       protocol: TCP

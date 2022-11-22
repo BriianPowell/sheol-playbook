@@ -51,9 +51,39 @@ metadata:
   namespace: homeassistant
   labels:
     app: homeassistant
+    type: local
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 80Mi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: homeassistant-pv
+  namespace: homeassistant
+  labels:
+    app: homeassistant
+    type: local
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: homeassistant-pvc
+    namespace: homeassistant
+  local:
+    path: /home/boog/GitHub/hass-config
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - sheol
