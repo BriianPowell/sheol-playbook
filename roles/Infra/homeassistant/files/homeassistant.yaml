@@ -34,8 +34,8 @@ spec:
         app: homeassistant
     spec:
       containers:
-        - name: home-assistant
-          image: homeassistant/home-assistant:latest
+        - name: homeassistant
+          image: ghcr.io/home-assistant/home-assistant:stable
           volumeMounts:
             - mountPath: '/config'
               name: ha-storage

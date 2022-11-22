@@ -9,7 +9,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`am.powell.place`)
+    - match: Host(`alertmanager.powell.place`)
       kind: Rule
       services:
         - name: alertmanager
