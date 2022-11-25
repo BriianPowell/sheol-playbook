@@ -5,6 +5,9 @@ metadata:
   namespace: homeassistant
   labels:
     app: homeassistant
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '5432'
 spec:
   selector:
     app: homeassistant-postgressql-db

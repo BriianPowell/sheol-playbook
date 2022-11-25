@@ -33,11 +33,13 @@ spec:
       labels:
         app: homeassistant
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: homeassistant
           image: ghcr.io/home-assistant/home-assistant:stable
           volumeMounts:
-            - mountPath: '/config'
+            - mountPath: /config
               name: ha-storage
       volumes:
         - name: ha-storage
