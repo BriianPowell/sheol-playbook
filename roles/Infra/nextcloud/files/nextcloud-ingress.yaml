@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud-dashboard-https
+  namespace: nextcloud
+  labels:
+    app: nextcloud
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nextcloud.powell.place`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 80

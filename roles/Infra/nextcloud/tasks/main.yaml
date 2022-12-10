@@ -1,0 +1,10 @@
+---
+- name: load variables
+  tags: [common, secrets]
+  include_vars: '{{ playbook_dir }}/secrets.env.yaml'
+
+- name: create nextcloud namespace
+  shell:
+    cmd: kubectl create namespace nextcloud
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_namespace

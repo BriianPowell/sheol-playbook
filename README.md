@@ -94,12 +94,12 @@ set -Ux OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
 
 ## Helpful References
 
-* https://stackoverflow.com/questions/60528376/traefik-redirect-from-one-host-to-another
-* https://community.traefik.io/t/cant-route-to-other-ip-port-on-subnet/11152/2
+- <https://stackoverflow.com/questions/60528376/traefik-redirect-from-one-host-to-another>
+- <https://community.traefik.io/t/cant-route-to-other-ip-port-on-subnet/11152/2>
 
-- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+- <https://kubernetes.io/docs/reference/kubectl/cheatsheet/>
 - <https://github.com/cert-manager/cert-manager>
-- https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/
+- <https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/>
 
 ## Helpful Debugging
 
@@ -109,4 +109,3 @@ Useful to verify k8s DNS entries
 kubectl create -f https://k8s.io/examples/admin/dns/busybox.yaml
 kubectl exec -ti busybox -- nslookup kubernetes.default
 ```
-
