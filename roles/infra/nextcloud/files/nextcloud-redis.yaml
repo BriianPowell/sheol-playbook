@@ -33,7 +33,7 @@ spec:
         component: redis
     spec:
       containers:
-        - name: redis
+        - name: nextcloud-redis
           image: redis:alpine
           ports:
             - containerPort: 6379
