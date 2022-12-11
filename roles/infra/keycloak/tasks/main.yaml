@@ -19,28 +19,31 @@
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_namespace
 
-- name: apply Keycloak postgressql
+- name: apply Keycloak secrets
   shell:
-    cmd: cat files/keycloak-postgres.yaml | envsubst | kubectl apply -f -
+    cmd: cat files/keycloak-secrets.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   environment:
-    PG_USER: '{{ keycloak.postgres.user }}'
-    PG_PASS: '{{ keycloak.postgres.password }}'
-    PG_DB: '{{ keycloak.postgres.db }}'
+    DOMAIN: '{{ domain_name_base64 }}'
+    KC_ADMN: '{{ keycloak.service.admin_base64 }}'
+    KC_PASS: '{{ keycloak.service.admin_password_base64 }}'
+    PG_USER: '{{ keycloak.postgres.user_base64 }}'
+    PG_PASS: '{{ keycloak.postgres.password_base64 }}'
+    PG_DB: '{{ keycloak.postgres.db_base64 }}'
+  delegate_to: 127.0.0.1
+  register: kubectl_keycloak_postgress
+
+- name: apply Keycloak postgressql
+  shell:
+    cmd: kubectl apply -f files/keycloak-postgres.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_postgress
 
 - name: apply Keycloak deployment
   shell:
-    cmd: cat files/keycloak.yaml | envsubst | kubectl apply -f -
+    cmd: kubectl apply -f files/keycloak.yaml
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
-  environment:
-    DOMAIN: '{{ domain_name }}'
-    KC_ADMN: '{{ keycloak.service.admin }}'
-    KC_PASS: '{{ keycloak.service.admin_password }}'
-    PG_USER: '{{ keycloak.postgres.user }}'
-    PG_PASS: '{{ keycloak.postgres.password }}'
-    PG_DB: '{{ keycloak.postgres.db }}'
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_service
 

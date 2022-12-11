@@ -44,11 +44,20 @@ spec:
           #   - min_wal_size=2048
           env:
             - name: POSTGRES_USER
-              value: ${PG_USER}
+              valueFrom:
+                secretKeyRef:
+                  name: homeassistant-secrets
+                  key: PG_USER
             - name: POSTGRES_PASSWORD
-              value: ${PG_PASS}
+              valueFrom:
+                secretKeyRef:
+                  name: homeassistant-secrets
+                  key: PG_PASS
             - name: POSTGRES_DB
-              value: ${PG_DB}
+              valueFrom:
+                secretKeyRef:
+                  name: homeassistant-secrets
+                  key: PG_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata #/data/pgdata
           ports:

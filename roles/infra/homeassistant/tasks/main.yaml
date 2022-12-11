@@ -9,16 +9,23 @@
   delegate_to: 127.0.0.1
   register: kubectl_homeassistant_namespace
 
-- name: apply Home Assistant postgressql
+- name: apply Home Assistant secrets
   shell:
-    cmd: cat files/homeassistant-postgres.yaml | envsubst | kubectl apply -f -
+    cmd: cat files/homeassistant-secrets.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/homeassistant'
   environment:
-    PG_USER: '{{ homeassistant.postgres.user }}'
-    PG_PASS: '{{ homeassistant.postgres.password }}'
-    PG_DB: '{{ homeassistant.postgres.db }}'
+    PG_USER: '{{ homeassistant.postgres.user_base64 }}'
+    PG_PASS: '{{ homeassistant.postgres.password_base64 }}'
+    PG_DB: '{{ homeassistant.postgres.db_base64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_postgress
+
+- name: apply Home Assistant deployment
+  shell:
+    cmd: kubectl apply -f files/homeassistant-postgres.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/homeassistant'
+  delegate_to: 127.0.0.1
+  register: kubectl_homeassistant_deployment
 
 - name: apply Home Assistant deployment
   shell:
