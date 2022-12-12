@@ -8,3 +8,20 @@
     cmd: kubectl create namespace nextcloud
   delegate_to: 127.0.0.1
   register: kubectl_nextcloud_namespace
+
+- name: apply NextCloud secrets
+  shell:
+    cmd: cat files/nextcloud-secrets.yaml | envsubst | kubectl apply -f -
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  environment:
+    PG_DB: '{{ nextcloud.postgres.db_64 }}'
+    PG_USER: '{{ nextcloud.postgres.user_64 }}'
+    PG_PASS: '{{ nextcloud.postgres.password_64 }}'
+    ADMIN_USER: '{{ nextcloud.admin_user_64 }}'
+    ADMIN_PASS: '{{ nextcloud.admin_password_64 }}'
+    DOMAIN: '{{ nextcloud.domain_64 }}'
+    SMTP_NAME: '{{ email.smtp.secondary_username_64 }}'
+    SMTP_PASSWORD: '{{ email.smtp.secondary_password_64 }}'
+    MAIL_FROM_ADDRESS: '{{ nextcloud.mail_from_64 }}'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_secrets

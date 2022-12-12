@@ -30,7 +30,7 @@
   environment:
     CLIENT_ID: '{{ keycloak.traefik-forward-auth.client_id_64 }}'
     CLIENT_SECRET: '{{ keycloak.traefik-forward-auth.client_secret_64 }}'
-    SECRET: '{{ keycloak.traefik-forward-auth.auth_secrety_base64 }}'
+    SECRET: '{{ keycloak.traefik-forward-auth.auth_secrety_64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_forward_auth_secret
 

@@ -37,11 +37,11 @@ spec:
       containers:
         - name: homeassistant-postgressql-db
           image: postgres:14.5
-          # args:
-          #   - -c
-          #   - max_wal_size=4096
-          #   - -c
-          #   - min_wal_size=2048
+          args:
+            - -c
+            - max_wal_size=4096
+            - -c
+            - min_wal_size=2048
           env:
             - name: POSTGRES_USER
               valueFrom:

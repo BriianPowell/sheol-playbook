@@ -14,9 +14,9 @@
     cmd: cat files/homeassistant-secrets.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/homeassistant'
   environment:
-    PG_USER: '{{ homeassistant.postgres.user_base64 }}'
-    PG_PASS: '{{ homeassistant.postgres.password_base64 }}'
-    PG_DB: '{{ homeassistant.postgres.db_base64 }}'
+    PG_USER: '{{ homeassistant.postgres.user_64 }}'
+    PG_PASS: '{{ homeassistant.postgres.password_64 }}'
+    PG_DB: '{{ homeassistant.postgres.db_64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_postgress
 

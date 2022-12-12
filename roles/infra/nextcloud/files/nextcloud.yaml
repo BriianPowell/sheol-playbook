@@ -1,3 +1,7 @@
+#
+# Reference: https://github.com/docker-library/docs/blob/master/nextcloud/README.md
+#
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,11 +10,17 @@ metadata:
   labels:
     app: nextcloud
     component: app
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '80'
 spec:
   selector:
     component: app
   ports:
-    - port: 80
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,12 +32,12 @@ metadata:
     component: app
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: nextcloud
       component: app
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -39,6 +49,8 @@ spec:
           image: nextcloud:apache
           imagePullPolicy: Always
           env:
+            - name: TIMEZONE
+              value: America/Los Angeles
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
@@ -66,22 +78,50 @@ spec:
                 secretKeyRef:
                   name: nextcloud-secrets
                   key: ADMIN_PASS
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: DOMAIN
+            - name: REDIS_HOST
+              value: nextcloud-redis
+            - name: SMTP_HOST
+              value: smtp.mail.me.com
+            - name: SMTP_SECURE
+              value: ssl
+            - name: SMTP_PORT
+              value: '587'
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: SMTP_NAME
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: SMTP_PASSWORD
+            - name: MAIL_FROM_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-secrets
+                  key: MAIL_FROM_ADDRESS
+            - name: APACHE_DISABLE_REWRITE_IP
+              value: '1'
+            - name: TRUSTED_PROXIES
+              value: 10.0.0.0/16 10.42.0.0/24
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
+              protocol: TCP
           volumeMounts:
             - name: nextcloud-storage
               mountPath: /var/www/html
-            - name: nextcloud-config
-              mountPath: /var/www/html/config
       restartPolicy: Always
       volumes:
         - name: nextcloud-storage
           persistentVolumeClaim:
             claimName: nextcloud-pvc
-        - name: nextcloud-config
-          configmap:
-            defaultMode: 420
-            name: nextcloud-server-conf
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

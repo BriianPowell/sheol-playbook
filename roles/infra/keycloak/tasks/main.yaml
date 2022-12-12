@@ -24,12 +24,12 @@
     cmd: cat files/keycloak-secrets.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   environment:
-    DOMAIN: '{{ domain_name_base64 }}'
-    KC_ADMN: '{{ keycloak.service.admin_base64 }}'
-    KC_PASS: '{{ keycloak.service.admin_password_base64 }}'
-    PG_USER: '{{ keycloak.postgres.user_base64 }}'
-    PG_PASS: '{{ keycloak.postgres.password_base64 }}'
-    PG_DB: '{{ keycloak.postgres.db_base64 }}'
+    DOMAIN: '{{ domain_name_64 }}'
+    KC_ADMN: '{{ keycloak.service.admin_64 }}'
+    KC_PASS: '{{ keycloak.service.admin_password_64 }}'
+    PG_USER: '{{ keycloak.postgres.user_64 }}'
+    PG_PASS: '{{ keycloak.postgres.password_64 }}'
+    PG_DB: '{{ keycloak.postgres.db_64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_keycloak_postgress
 
