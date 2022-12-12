@@ -13,6 +13,13 @@
 #   debug:
 #     var: kubectl_namespaces.stdout
 
+# - name: kustomize example
+#   shell:
+#     cmd: kubectl apply -k files
+#     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
+#   delegate_to: 127.0.0.1
+#   register: keycloak_serice
+
 - name: apply forward-auth configmap
   shell:
     cmd: cat files/forward-auth-config.yaml | envsubst | kubectl apply -f -
@@ -21,7 +28,7 @@
     DOMAIN: '{{ domain_name }}'
     DISC_URL: '{{ keycloak.traefik-forward-auth.discovery_url }'
   delegate_to: 127.0.0.1
-  register: kubectl_forward_auth_configmap
+  register: kubectl_forward_auth_config
 
 - name: apply forward-auth secret
   shell:
@@ -47,9 +54,3 @@
     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
   delegate_to: 127.0.0.1
   register: kubectl_forward_auth_ingress
-# - name: kustomize example
-#   shell:
-#     cmd: kubectl apply -k files
-#     chdir: '{{ playbook_dir }}/roles/infra/traefik-forward-auth'
-#   delegate_to: 127.0.0.1
-#   register: keycloak_serice

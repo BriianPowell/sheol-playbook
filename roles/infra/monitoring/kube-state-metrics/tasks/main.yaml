@@ -8,4 +8,4 @@
     cmd: kubectl apply -k files/
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/kube-state-metrics'
   delegate_to: 127.0.0.1
-  register: kubectl_prometheus_cluster_role
+  register: kubectl_kube_state_metrics

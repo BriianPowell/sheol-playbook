@@ -1,5 +1,7 @@
 #
-# Reference: https://github.com/docker-library/docs/blob/master/nextcloud/README.md
+# Reference:
+# https://github.com/docker-library/docs/blob/master/nextcloud/README.md
+# https://docs.nextcloud.com/server/latest/admin_manual/contents.html
 #
 
 apiVersion: v1

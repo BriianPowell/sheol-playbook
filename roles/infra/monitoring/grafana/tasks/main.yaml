@@ -25,7 +25,7 @@
     CLIENT_SECRET: '{{ grafana.client_secret }}'
     ROOT_URL: '{{ grafana.root_url }}'
   delegate_to: 127.0.0.1
-  register: kubectl_grafana_configmap
+  register: kubectl_grafana_config
 
 - name: apply Grafana data sources
   shell:

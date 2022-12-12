@@ -31,21 +31,21 @@
     PG_PASS: '{{ keycloak.postgres.password_64 }}'
     PG_DB: '{{ keycloak.postgres.db_64 }}'
   delegate_to: 127.0.0.1
-  register: kubectl_keycloak_postgress
+  register: kubectl_keycloak_secrets
 
-- name: apply Keycloak postgressql
+- name: apply Keycloak postgres
   shell:
     cmd: kubectl apply -f files/keycloak-postgres.yaml
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   delegate_to: 127.0.0.1
-  register: kubectl_keycloak_postgress
+  register: kubectl_keycloak_postgres
 
 - name: apply Keycloak deployment
   shell:
     cmd: kubectl apply -f files/keycloak.yaml
     chdir: '{{ playbook_dir }}/roles/infra/keycloak'
   delegate_to: 127.0.0.1
-  register: kubectl_keycloak_service
+  register: kubectl_keycloak_deployment
 
 - name: apply Keycloak ingress
   shell:

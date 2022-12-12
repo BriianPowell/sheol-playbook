@@ -25,3 +25,38 @@
     MAIL_FROM_ADDRESS: '{{ nextcloud.mail_from_64 }}'
   delegate_to: 127.0.0.1
   register: kubectl_nextcloud_secrets
+
+- name: apply NextCloud redis
+  shell:
+    cmd: kubectl apply -f files/nextcloud-redis.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_redis
+
+- name: apply NextCloud postgres
+  shell:
+    cmd: kubectl apply -f files/nextcloud-postgres.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_postgres
+
+- name: apply NextCloud deployment
+  shell:
+    cmd: kubectl apply -f files/nextcloud.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_deployment
+
+- name: apply NextCloud cron
+  shell:
+    cmd: kubectl apply -f files/nextcloud-cron.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_cron
+
+- name: apply NextCloud ingress
+  shell:
+    cmd: kubectl apply -f files/nextcloud-ingress.yaml
+    chdir: '{{ playbook_dir }}/roles/infra/nextcloud'
+  delegate_to: 127.0.0.1
+  register: kubectl_nextcloud_ingress
