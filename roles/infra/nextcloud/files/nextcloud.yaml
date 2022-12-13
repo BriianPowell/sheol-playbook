@@ -53,6 +53,8 @@ spec:
           env:
             - name: TIMEZONE
               value: America/Los Angeles
+            - name: DEFAULT_PHONE_REGION
+              value: US
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:

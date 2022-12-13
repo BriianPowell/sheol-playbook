@@ -14,3 +14,8 @@ spec:
       services:
         - name: nextcloud
           port: 80
+      middlewares:
+        - name: nextcloud-headers-middleware
+          namespace: nextcloud
+        - name: nextcloud-redirect-middleware
+          namespace: nextcloud
