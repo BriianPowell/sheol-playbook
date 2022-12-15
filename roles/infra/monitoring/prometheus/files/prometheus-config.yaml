@@ -233,3 +233,12 @@ data:
           - source_labels: [__meta_kubernetes_endpoints_name]
             regex: 'node-exporter'
             action: keep
+
+      - job_name: 'hass'
+        scrape_interval: 60s
+        metrics_path: /api/prometheus
+        authorization:
+          credentials: ${HASS_TOKEN}
+        scheme: http
+        static_configs:
+          - targets: ['homeassistant.homeassistant.svc.cluster.local:8123']

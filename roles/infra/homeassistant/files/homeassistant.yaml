@@ -5,9 +5,6 @@ metadata:
   namespace: homeassistant
   labels:
     app: homeassistant
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '8123'
 spec:
   selector:
     app: homeassistant

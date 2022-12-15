@@ -18,12 +18,12 @@
     cmd: cat files/grafana-config.yaml | envsubst | kubectl apply -f -
     chdir: '{{ playbook_dir }}/roles/infra/monitoring/grafana'
   environment:
-    API_URL: '{{ grafana.api_url }}'
-    AUTH_URL: '{{ grafana.auth_url }}'
-    TOKEN_URL: '{{ grafana.token_url }}'
-    CLIENT_ID: '{{ grafana.client_id }}'
-    CLIENT_SECRET: '{{ grafana.client_secret }}'
-    ROOT_URL: '{{ grafana.root_url }}'
+    API_URL: '{{ monitoring.grafana.api_url }}'
+    AUTH_URL: '{{ monitoring.grafana.auth_url }}'
+    TOKEN_URL: '{{ monitoring.grafana.token_url }}'
+    CLIENT_ID: '{{ monitoring.grafana.client_id }}'
+    CLIENT_SECRET: '{{ monitoring.grafana.client_secret }}'
+    ROOT_URL: '{{ monitoring.grafana.root_url }}'
   delegate_to: 127.0.0.1
   register: kubectl_grafana_config
 
